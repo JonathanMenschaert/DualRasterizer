@@ -6,6 +6,7 @@ struct SDL_Surface;
 
 namespace dae
 {
+	struct Camera;
 	class Processor
 	{
 	public:
@@ -17,7 +18,7 @@ namespace dae
 		Processor& operator=(const Processor& processor) = delete;
 		Processor& operator=(Processor&& processor) noexcept = delete;
 
-		virtual void Render(Mesh& mesh) const = 0;
+		virtual void Render(std::vector<Mesh*> meshes, const Camera* camera) const = 0;
 
 	protected:
 		SDL_Window* m_pWindow{nullptr};

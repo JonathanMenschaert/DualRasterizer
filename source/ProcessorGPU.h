@@ -3,6 +3,7 @@
 
 namespace dae
 {
+	struct Camera;
 	class ProcessorGPU final : public Processor
 	{
 	public:
@@ -15,7 +16,7 @@ namespace dae
 		ProcessorGPU& operator=(ProcessorGPU&& processor) noexcept = delete;
 
 
-		virtual void Render(Mesh& mesh) const override;
+		virtual void Render(std::vector<Mesh*> meshes, const Camera* camera) const override;
 	
 	private:
 		

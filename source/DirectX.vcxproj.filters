@@ -63,7 +63,12 @@
     <ClInclude Include="EffectTransparent.h">
       <Filter>Effects</Filter>
     </ClInclude>
-    <ClInclude Include="ProcessorGPU.h" />
+    <ClInclude Include="ProcessorGPU.h">
+      <Filter>Processor</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -103,7 +108,7 @@
       <Filter>Effects</Filter>
     </ClCompile>
     <ClCompile Include="ProcessorGPU.cpp">
-      <Filter>Math</Filter>
+      <Filter>Processor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

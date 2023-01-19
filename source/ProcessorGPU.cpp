@@ -24,6 +24,25 @@ namespace dae
 	}
 
 
+	void ProcessorGPU::Render(std::vector<Mesh*> meshes, const Camera* camera) const
+	{
+		if (!m_IsInitialized) return;
+
+		//1. Clear RTV & DSV
+		ColorRGB clearColor = ColorRGB{ 0.f, 0.f, 0.3f };
+		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, &clearColor.r);
+		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+
+		//2. Set Pipeline + Invoke Drawcalls (= render)
+		for (Mesh* pMesh : meshes)
+		{
+			pMesh->Render(m_pDeviceContext);
+		}
+
+		//3. Present Backbuffer (swap)
+		m_pSwapChain->Present(0, 0);
+	}
+
 	HRESULT ProcessorGPU::InitializeDirectX()
 	{
 		//1. Create Device & DeviceContext
