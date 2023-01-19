@@ -8,6 +8,12 @@
     <Filter Include="Misc">
       <UniqueIdentifier>{72056cb6-72a2-42b7-b05e-376f1ddd957e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Processor">
+      <UniqueIdentifier>{fda08a86-1d5e-4c40-8cba-543319ae7d1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Effects">
+      <UniqueIdentifier>{3893f740-11c0-4518-a525-60a27bfb97e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h" />
@@ -36,6 +42,27 @@
     <ClInclude Include="ColorRGB.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="Processor.h">
+      <Filter>Processor</Filter>
+    </ClInclude>
+    <ClInclude Include="Effect.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectOpaque.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectTransparent.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -56,5 +83,23 @@
       <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Processor.cpp">
+      <Filter>Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="Effect.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectOpaque.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectTransparent.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
