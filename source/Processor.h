@@ -1,12 +1,15 @@
 #pragma once
 #include "Mesh.h"
 
+struct SDL_Window;
+struct SDL_Surface;
+
 namespace dae
 {
 	class Processor
 	{
 	public:
-		Processor() = default;
+		Processor(SDL_Window* pWindow);
 		virtual ~Processor() = default;
 
 		Processor(const Processor& processor) = delete;
@@ -14,10 +17,12 @@ namespace dae
 		Processor& operator=(const Processor& processor) = delete;
 		Processor& operator=(Processor&& processor) noexcept = delete;
 
-		void Render(Mesh& mesh);
+		virtual void Render(Mesh& mesh) const = 0;
 
-	private:
-
+	protected:
+		SDL_Window* m_pWindow{nullptr};
+		int m_Width{};
+		int m_Height{};
 	};
 }
 
