@@ -4,18 +4,21 @@
 namespace dae
 {
 	class Texture;
-	class EffectTransparant : public Effect
+	using std::string;
+	class EffectTransparent : public Effect
 	{
 	public:
 
-		EffectTransparant(ID3D11Device* pDevice, const std::wstring& assetFile);
-		virtual ~EffectTransparant();
-		EffectTransparant(const EffectTransparant&) = delete;
-		EffectTransparant(EffectTransparant&&) noexcept = delete;
-		EffectTransparant& operator=(const EffectTransparant&) = delete;
-		EffectTransparant& operator=(EffectTransparant&&) noexcept = delete;
+		EffectTransparent(ID3D11Device* pDevice, const std::wstring& assetFile);
+		virtual ~EffectTransparent();
+		EffectTransparent(const EffectTransparent&) = delete;
+		EffectTransparent(EffectTransparent&&) noexcept = delete;
+		EffectTransparent& operator=(const EffectTransparent&) = delete;
+		EffectTransparent& operator=(EffectTransparent&&) noexcept = delete;
 
 		void SetDiffuseMap(Texture* pDiffuseTexture);
+
+		static EffectTransparent* CreateEffect(ID3D11Device* pDevice, const std::wstring& fxPath, const string& diffusePath);
 
 		virtual ID3D11InputLayout* CreateInputLayout(ID3D11Device* pDevice) const;
 

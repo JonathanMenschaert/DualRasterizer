@@ -5,6 +5,8 @@ struct SDL_Surface;
 
 namespace dae
 {
+	class Processor;
+	class ProcessorGPU;
 	class Renderer final
 	{
 	public:
@@ -20,15 +22,21 @@ namespace dae
 		void Render() const;
 
 	private:
+
+		void InitMeshes();
+
 		SDL_Window* m_pWindow{};
 
 		int m_Width{};
 		int m_Height{};
 
-		bool m_IsInitialized{ false };
+		//bool m_IsInitialized{ false };
 
-		//DIRECTX
-		HRESULT InitializeDirectX();
-		//...
+		std::vector<Mesh*> m_Meshes{};
+		
+		//Processors
+		Processor* m_pRenderProcessor;
+		ProcessorGPU* m_pProcessorGPU;
+
 	};
 }

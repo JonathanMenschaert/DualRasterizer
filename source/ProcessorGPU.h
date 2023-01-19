@@ -8,7 +8,7 @@ namespace dae
 	{
 	public:
 		ProcessorGPU(SDL_Window* pWindow);
-		virtual ~ProcessorGPU() = default;
+		virtual ~ProcessorGPU();
 
 		ProcessorGPU(const ProcessorGPU& processor) = delete;
 		ProcessorGPU(ProcessorGPU&& processor) noexcept = delete;

@@ -4,7 +4,7 @@
 
 namespace dae
 {
-	EffectTransparant::EffectTransparant(ID3D11Device* pDevice, const std::wstring& assetFile)
+	EffectTransparent::EffectTransparent(ID3D11Device* pDevice, const std::wstring& assetFile)
 		:Effect(pDevice, assetFile)
 	{
 		//connect the different matrices to the hlsl file
@@ -22,14 +22,14 @@ namespace dae
 		}
 	}
 
-	EffectTransparant::~EffectTransparant()
+	EffectTransparent::~EffectTransparent()
 	{
 		//Release resources
 		if (m_pDiffuseMapVar) m_pDiffuseMapVar->Release();
 	}
 
 	//Diffuse map should be set at effect initialisation
-	void EffectTransparant::SetDiffuseMap(Texture* pDiffuseTexture)
+	void EffectTransparent::SetDiffuseMap(Texture* pDiffuseTexture)
 	{
 		if (m_pDiffuseMapVar)
 		{
@@ -37,7 +37,26 @@ namespace dae
 		}
 	}
 
-	ID3D11InputLayout* EffectTransparant::CreateInputLayout(ID3D11Device* pDevice) const
+	EffectTransparent* EffectTransparent::CreateEffect(ID3D11Device* pDevice, const std::wstring& fxPath, const string& diffusePath)
+	{
+		//Initialize effect
+		EffectTransparent* pEffect{ new EffectTransparent(pDevice, fxPath) };
+
+		//Add texture to the respective variable if valid
+		Texture* pDiffuseTexture{ nullptr };
+
+		if (!diffusePath.empty()) pDiffuseTexture = Texture::LoadFromFile(pDevice, diffusePath);
+
+		//Add textures to the effect
+		pEffect->SetDiffuseMap(pDiffuseTexture);
+
+		//Delete the textures as they are not necessary anymore
+		delete pDiffuseTexture;
+		
+		return pEffect;
+	}
+
+	ID3D11InputLayout* EffectTransparent::CreateInputLayout(ID3D11Device* pDevice) const
 	{
 		//Create Vertex Layout
 		static constexpr uint32_t numElements{ 4 };

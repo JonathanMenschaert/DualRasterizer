@@ -96,6 +96,40 @@ namespace dae
 		}
 	}
 
+	//Factory function for the opaque effect
+	EffectOpaque* EffectOpaque::CreateEffect(ID3D11Device* pDevice, const std::wstring& fxPath, const string& diffusePath, 
+		const string& normalPath, const string& specularPath, const string& glossinessPath)
+	{
+		//Initialize effect
+		EffectOpaque* pEffect{ new EffectOpaque(pDevice, fxPath) };
+
+		//Add texture to the respective variable if valid
+		Texture* pDiffuseTexture{ nullptr };
+		Texture* pNormalTexture{ nullptr };
+		Texture* pSpecularTexture{ nullptr };
+		Texture* pGlossinessTexture{ nullptr };
+
+		if (!diffusePath.empty()) pDiffuseTexture = Texture::LoadFromFile(pDevice, diffusePath);
+		if (!normalPath.empty()) pNormalTexture = Texture::LoadFromFile(pDevice, normalPath);
+		if (!specularPath.empty()) pSpecularTexture = Texture::LoadFromFile(pDevice, specularPath);
+		if (!glossinessPath.empty()) pGlossinessTexture = Texture::LoadFromFile(pDevice, glossinessPath);
+
+		//Add textures to the effect
+
+		pEffect->SetDiffuseMap(pDiffuseTexture);
+		pEffect->SetNormalMap(pNormalTexture);
+		pEffect->SetSpecularMap(pSpecularTexture);
+		pEffect->SetGlossinessMap(pGlossinessTexture);
+
+		//Delete the textures as they are not necessary anymore
+		delete pDiffuseTexture;
+		delete pNormalTexture;
+		delete pSpecularTexture;
+		delete pGlossinessTexture;
+
+		return pEffect;
+	}
+
 	ID3D11InputLayout* EffectOpaque::CreateInputLayout(ID3D11Device* pDevice) const
 	{
 		//Create Vertex Layout
