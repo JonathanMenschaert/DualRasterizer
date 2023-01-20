@@ -31,5 +31,10 @@ namespace dae
 		ID3DX11EffectShaderResourceVariable* m_pNormalMapVar{ nullptr };
 		ID3DX11EffectShaderResourceVariable* m_pSpecularMapVar{ nullptr };
 		ID3DX11EffectShaderResourceVariable* m_pGlossinessMapVar{ nullptr };
+
+		Texture* m_pDiffuseTexture{ nullptr };
+		Texture* m_pNormalTexture{ nullptr };
+		Texture* m_pSpecularTexture{ nullptr };
+		Texture* m_pGlossinessTexture{ nullptr };
     };
 }

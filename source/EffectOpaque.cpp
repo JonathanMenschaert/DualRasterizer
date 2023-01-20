@@ -58,13 +58,19 @@ namespace dae
 		if (m_pNormalMapVar) m_pNormalMapVar->Release();
 		if (m_pSpecularMapVar) m_pSpecularMapVar->Release();
 		if (m_pGlossinessMapVar) m_pGlossinessMapVar->Release();
+
+		delete m_pDiffuseTexture;
+		delete m_pNormalTexture;
+		delete m_pSpecularTexture;
+		delete m_pGlossinessTexture;
 	}
 
 	//Diffuse map should be set at effect initialisation
 	void EffectOpaque::SetDiffuseMap(Texture* pDiffuseTexture)
 	{
-		if (m_pDiffuseMapVar)
+		if (m_pDiffuseMapVar && pDiffuseTexture)
 		{
+			m_pDiffuseTexture = pDiffuseTexture;
 			m_pDiffuseMapVar->SetResource(pDiffuseTexture->GetSRV());
 		}
 	}
@@ -72,8 +78,9 @@ namespace dae
 	//Normal map should be set at effect initialisation
 	void EffectOpaque::SetNormalMap(Texture* pNormalTexture)
 	{
-		if (m_pNormalMapVar)
+		if (m_pNormalMapVar && pNormalTexture)
 		{
+			m_pNormalTexture = pNormalTexture;
 			m_pNormalMapVar->SetResource(pNormalTexture->GetSRV());
 		}
 	}
@@ -81,8 +88,9 @@ namespace dae
 	//Specular map should be set at effect initialisation
 	void EffectOpaque::SetSpecularMap(Texture* pSpecularTexture)
 	{
-		if (m_pSpecularMapVar)
+		if (m_pSpecularMapVar && pSpecularTexture)
 		{
+			m_pSpecularTexture = pSpecularTexture;
 			m_pSpecularMapVar->SetResource(pSpecularTexture->GetSRV());
 		}
 	}
@@ -90,8 +98,9 @@ namespace dae
 	//Glossiness map should be set at effect initialisation
 	void EffectOpaque::SetGlossinessMap(Texture* pGlossinessTexture)
 	{
-		if (m_pGlossinessMapVar)
+		if (m_pGlossinessMapVar && pGlossinessTexture)
 		{
+			m_pGlossinessTexture = pGlossinessTexture;
 			m_pGlossinessMapVar->SetResource(pGlossinessTexture->GetSRV());
 		}
 	}
@@ -121,12 +130,6 @@ namespace dae
 		pEffect->SetSpecularMap(pSpecularTexture);
 		pEffect->SetGlossinessMap(pGlossinessTexture);
 
-		//Delete the textures as they are not necessary anymore
-		delete pDiffuseTexture;
-		delete pNormalTexture;
-		delete pSpecularTexture;
-		delete pGlossinessTexture;
-
 		return pEffect;
 	}
 
@@ -154,8 +157,6 @@ namespace dae
 		vertexDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 		vertexDesc[2].AlignedByteOffset = 32;
 		vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-
-
 
 		//Create Input Layout
 		D3DX11_PASS_DESC passDesc{};

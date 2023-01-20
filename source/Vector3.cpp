@@ -1,10 +1,11 @@
 #include "pch.h"
-
 #include "Vector3.h"
 
 #include <cassert>
 
 #include "Vector4.h"
+#include <cmath>
+
 #include "Vector2.h"
 
 namespace dae {

@@ -109,15 +109,18 @@ namespace dae
 
 	void Effect::SetViewProjectionMatrix(const Matrix& matrix)
 	{
+		if (!m_pMatWorldViewProjVar) return;
 		m_pMatWorldViewProjVar->SetMatrix(reinterpret_cast<const float*>(&matrix));
 	}
 
 	void Effect::SetWorldMatrix(const Matrix& matrix)
 	{
+		if (!m_pMatWorldVar) return;
 		m_pMatWorldVar->SetMatrix(reinterpret_cast<const float*>(&matrix));
 	}
 	void Effect::SetViewInverseMatrix(const Matrix& matrix)
 	{
+		if (!m_pMatViewInverseVar) return;
 		m_pMatViewInverseVar->SetMatrix(reinterpret_cast<const float*>(&matrix));
 	}
 }

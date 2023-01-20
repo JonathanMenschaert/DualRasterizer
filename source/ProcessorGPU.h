@@ -7,7 +7,7 @@ namespace dae
 	class ProcessorGPU final : public Processor
 	{
 	public:
-		ProcessorGPU(SDL_Window* pWindow);
+		ProcessorGPU(ID3D11Device* pDevice, ID3D11DeviceContext* m_pDeviceContext, SDL_Window* pWindow);
 		virtual ~ProcessorGPU();
 
 		ProcessorGPU(const ProcessorGPU& processor) = delete;
@@ -16,7 +16,7 @@ namespace dae
 		ProcessorGPU& operator=(ProcessorGPU&& processor) noexcept = delete;
 
 
-		virtual void Render(std::vector<Mesh*> meshes, const Camera* camera) const override;
+		virtual void Render(std::vector<Mesh*>& meshes, const Camera* camera) override;
 	
 	private:
 		

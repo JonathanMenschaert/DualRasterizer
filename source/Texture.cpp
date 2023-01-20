@@ -5,6 +5,8 @@
 namespace dae
 {
 	Texture::Texture(ID3D11Device* pDevice, SDL_Surface* pSurface)
+		: m_pSurface{pSurface}
+		, m_pSurfacePixels{ static_cast<uint32_t*>(pSurface->pixels) }
 	{
 		//Create Resource
 		DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -45,9 +47,6 @@ namespace dae
 			std::wcout << L"Shader Resource View creation failed!\n";
 			return;
 		}
-
-		//Release pSurface, as it's not necessary anymore
-		SDL_FreeSurface(pSurface);
 	}
 
 	Texture::~Texture()
@@ -55,7 +54,7 @@ namespace dae
 		//Release resources
 		if (m_pSRV) m_pSRV->Release();
 		if (m_pResource) m_pResource->Release();
-
+		if (m_pSurface) SDL_FreeSurface(m_pSurface);
 	}
 
 	ID3D11ShaderResourceView* Texture::GetSRV() const

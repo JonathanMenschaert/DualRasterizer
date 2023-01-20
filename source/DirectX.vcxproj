@@ -80,6 +80,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ColorRGB.h" />
+    <ClInclude Include="DataTypes.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="EffectOpaque.h" />
     <ClInclude Include="EffectTransparent.h" />
@@ -88,6 +89,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Processor.h" />
+    <ClInclude Include="ProcessorCPU.h" />
     <ClInclude Include="ProcessorGPU.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Texture.h" />
@@ -113,6 +115,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Processor.cpp" />
+    <ClCompile Include="ProcessorCPU.cpp" />
     <ClCompile Include="ProcessorGPU.cpp" />
     <ClCompile Include="Renderer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>

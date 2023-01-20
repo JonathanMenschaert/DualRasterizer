@@ -69,6 +69,12 @@
     <ClInclude Include="Camera.h">
       <Filter>Misc</Filter>
     </ClInclude>
+    <ClInclude Include="ProcessorCPU.h">
+      <Filter>Processor</Filter>
+    </ClInclude>
+    <ClInclude Include="DataTypes.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -108,6 +114,9 @@
       <Filter>Effects</Filter>
     </ClCompile>
     <ClCompile Include="ProcessorGPU.cpp">
+      <Filter>Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessorCPU.cpp">
       <Filter>Processor</Filter>
     </ClCompile>
   </ItemGroup>

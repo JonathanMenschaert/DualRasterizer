@@ -109,10 +109,9 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
 
 	float3 viewDirection = normalize(input.WorldPosition.xyz - gViewInverse[3].xyz);
 	float phongExp = gShininess * gGlossinessMap.Sample(gSampleState, input.UV).r;
-	float phong = CalculateSpecular(gSpecularMap.Sample(gSampleState, input.UV), 1.f, phongExp, gLightDirection, viewDirection, sampledNormal);
+	float phong = CalculateSpecular(gSpecularMap.Sample(gSampleState, input.UV), 1.f, phongExp, gLightDirection, -viewDirection, sampledNormal);
 
 	return (lambert + phong) * observedArea;
-	//return gDiffuseMap.Sample(gSampleState, input.UV);
 }
 
 //---------------

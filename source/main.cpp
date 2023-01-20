@@ -28,7 +28,7 @@ int main(int argc, char* args[])
 	const uint32_t height = 480;
 
 	SDL_Window* pWindow = SDL_CreateWindow(
-		"DirectX - ***Insert Name/Class***",
+		"Dual Rasterizer - Jonathan Menschaert (2DAE15)",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height, 0);
@@ -44,6 +44,7 @@ int main(int argc, char* args[])
 	pTimer->Start();
 	float printTimer = 0.f;
 	bool isLooping = true;
+	bool showFps = false;
 	while (isLooping)
 	{
 		//--------- Get input events ---------
@@ -56,8 +57,18 @@ int main(int argc, char* args[])
 				isLooping = false;
 				break;
 			case SDL_KEYUP:
-				//Test for a key
-				//if (e.key.keysym.scancode == SDL_SCANCODE_X)
+				switch (e.key.keysym.scancode)
+				{
+				case SDL_SCANCODE_F1: //Switch between cpu and gpu to render the scene
+					pRenderer->ToggleProcessor();
+					break;
+				case SDL_SCANCODE_F2:
+					pRenderer->ToggleRotation(); //Turn rotation on or off
+					break;
+				case SDL_SCANCODE_F11:
+					showFps = !showFps; //Toggle printing of fps
+					break;
+				}
 				break;
 			default: ;
 			}
@@ -70,13 +81,14 @@ int main(int argc, char* args[])
 		pRenderer->Render();
 
 		//--------- Timer ---------
+		
 		pTimer->Update();
 		printTimer += pTimer->GetElapsed();
-		if (printTimer >= 1.f)
+		if (printTimer >= 1.f && showFps)
 		{
 			printTimer = 0.f;
 			std::cout << "dFPS: " << pTimer->GetdFPS() << std::endl;
-		}
+		}		
 	}
 	pTimer->Stop();
 

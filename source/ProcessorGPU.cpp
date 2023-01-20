@@ -1,11 +1,16 @@
 #include "pch.h"
 #include "ProcessorGPU.h"
 
+//Multithreading includes
+#include <thread>
+#include <ppl.h>
 
 namespace dae
 {
-	ProcessorGPU::ProcessorGPU(SDL_Window* pWindow)
+	ProcessorGPU::ProcessorGPU(ID3D11Device* pDevice, ID3D11DeviceContext* pDeviceContext, SDL_Window* pWindow)
 		:Processor{pWindow}
+		,m_pDevice{pDevice}
+		,m_pDeviceContext{pDeviceContext}
 	{
 
 		//Initialize DirectX
@@ -41,11 +46,12 @@ namespace dae
 	}
 
 
-	void ProcessorGPU::Render(std::vector<Mesh*> meshes, const Camera* camera) const
+	void ProcessorGPU::Render(std::vector<Mesh*>& meshes, const Camera* camera)
 	{
 		if (!m_IsInitialized) return;
 
 		//1. Clear RTV & DSV
+		//ColorRGB clearColor = ColorRGB{ 0.39f, 0.59f, 0.93f };
 		ColorRGB clearColor = ColorRGB{ 0.f, 0.f, 0.3f };
 		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, &clearColor.r);
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
@@ -62,24 +68,13 @@ namespace dae
 
 	HRESULT ProcessorGPU::InitializeDirectX()
 	{
-		//1. Create Device & DeviceContext
-		//=====
-		D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_1;
-		uint32_t createDeviceFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-		createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-
-		HRESULT result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, createDeviceFlags, &featureLevel, 1, D3D11_SDK_VERSION,
-			&m_pDevice, nullptr, &m_pDeviceContext);
-		if (FAILED(result)) return result;
 
 		//Create DXGI Factory
 		IDXGIFactory1* pDxgiFactory{};
-		result = CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&pDxgiFactory));
+		HRESULT result = CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&pDxgiFactory));
 		if (FAILED(result)) return result;
 
-		//2. Create Swapchain
+		//1. Create Swapchain
 		//=====
 		DXGI_SWAP_CHAIN_DESC swapChainDesc{};
 		swapChainDesc.BufferDesc.Width = m_Width;
@@ -109,7 +104,7 @@ namespace dae
 
 		if (FAILED(result)) return result;
 
-		//3. Create DepthStencil (DS) & DepthStencilView (DSV)
+		//2. Create DepthStencil (DS) & DepthStencilView (DSV)
 		//Resource
 		D3D11_TEXTURE2D_DESC depthStencilDesc{};
 		depthStencilDesc.Width = m_Width;
@@ -137,7 +132,7 @@ namespace dae
 		result = m_pDevice->CreateDepthStencilView(m_pDepthStencilBuffer, &depthStencilViewDesc, &m_pDepthStencilView);
 		if (FAILED(result)) return result;
 
-		//4. Create RenderTarget (RT) & RenderTargetView (RTV)
+		//3. Create RenderTarget (RT) & RenderTargetView (RTV)
 		//=====
 
 		//Resource
@@ -148,10 +143,10 @@ namespace dae
 		if (FAILED(result)) return result;
 
 
-		//5. Bind RTV & DSV to Output Merger Stage
+		//4. Bind RTV & DSV to Output Merger Stage
 		m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 
-		//6. Set Viewport
+		//5. Set Viewport
 		//====
 		D3D11_VIEWPORT viewPort{};
 		viewPort.Width = static_cast<float>(m_Width);

@@ -19,5 +19,9 @@ namespace dae
 	private:
 		ID3D11Texture2D* m_pResource{ nullptr };
 		ID3D11ShaderResourceView* m_pSRV{ nullptr };
+
+		SDL_Surface* m_pSurface{ nullptr };
+		uint32_t* m_pSurfacePixels{ nullptr };
+		const float m_ColorModifier{ 1.f / 255.f };
 	};
 }

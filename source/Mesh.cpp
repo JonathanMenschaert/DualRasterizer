@@ -5,10 +5,12 @@
 
 namespace dae
 {
-	Mesh::Mesh(ID3D11Device* pDevice, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, Effect* pEffect)
+	Mesh::Mesh(ID3D11Device* pDevice, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, Effect* pEffect,
+		const Vector3& rotation, const Vector3& translation)
 		: m_pEffect{pEffect}
 	{
-		m_RotationMatrix = Matrix::CreateRotation(Vector3{ 0.f, 0.f, 0.f });
+		m_RotationMatrix = Matrix::CreateRotation(rotation);
+		m_TranslationMatrix = Matrix::CreateTranslation(translation);
 
 		m_pInputLayout = m_pEffect->CreateInputLayout(pDevice);
 
@@ -45,6 +47,18 @@ namespace dae
 			std::wcout << L"Index Buffer creation failed!\n";
 			return;
 		}
+
+		m_Indices = indices;
+		for (const Vertex& vertex : vertices)
+		{
+			VertexExt out{};
+			out.position = vertex.position;
+			out.uv = vertex.uv;
+			out.normal = vertex.normal;
+			out.tangent = vertex.tangent;
+
+			m_Vertices.emplace_back(out);
+		}
 	}
 
 
@@ -78,8 +92,8 @@ namespace dae
 	void Mesh::Render(ID3D11DeviceContext* pDeviceContext) const
 	{
 		//1. Set Primitive Topology
-		pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+		pDeviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(m_Topology));
+		
 		//2. Set Input Layout
 		pDeviceContext->IASetInputLayout(m_pInputLayout);
 
@@ -104,8 +118,29 @@ namespace dae
 
 	void Mesh::SetMatrices(const Matrix& viewProjMatrix, const Matrix& inverseViewMatrix)
 	{
-		m_pEffect->SetViewProjectionMatrix(m_RotationMatrix * viewProjMatrix);
-		m_pEffect->SetWorldMatrix(m_RotationMatrix);
+		m_WorldMatrix = m_RotationMatrix * m_TranslationMatrix;
+		m_pEffect->SetViewProjectionMatrix(m_WorldMatrix * viewProjMatrix);
+		m_pEffect->SetWorldMatrix(m_WorldMatrix);
 		m_pEffect->SetViewInverseMatrix(inverseViewMatrix);
+	}
+	const std::vector<VertexExt>& Mesh::GetVertices() const
+	{
+		return m_Vertices;
+	}
+	std::vector<VertexOut>& Mesh::GetVerticesOut()
+	{
+		return m_VerticesOut;
+	}
+	const std::vector<uint32_t>& Mesh::GetIndices() const
+	{
+		return m_Indices;
+	}
+	const Matrix& Mesh::GetWorldMatrix() const
+	{
+		return m_WorldMatrix;
+	}
+	PrimitiveTopology Mesh::GetPrimitiveTopology() const
+	{
+		return m_Topology;
 	}
 }
