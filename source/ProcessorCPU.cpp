@@ -21,6 +21,8 @@ namespace dae
 		const int nrPixels{ m_Width * m_Height };
 		m_pDepthBufferPixels = new float[nrPixels];
 		std::fill_n(m_pDepthBufferPixels, nrPixels, FLT_MAX);
+
+		m_BackgroundColor = m_SoftwareColor * 255.f; //Multiply color to fit the FillRect function
 	}
 
 	ProcessorCPU::~ProcessorCPU()
@@ -32,7 +34,11 @@ namespace dae
 	void ProcessorCPU::Render(std::vector<Mesh*>& meshes, const Camera* camera)
 	{
 		//Lock Backbuffer
-		SDL_FillRect(m_pBackBuffer, NULL, SDL_MapRGB(m_pBackBuffer->format, 100, 100, 100));
+		SDL_FillRect(m_pBackBuffer, NULL, SDL_MapRGB(m_pBackBuffer->format, 
+			static_cast<Uint8>(m_BackgroundColor.r), 
+			static_cast<Uint8>(m_BackgroundColor.g),
+			static_cast<Uint8>(m_BackgroundColor.b)
+		));
 		const int nrPixels{ m_Width * m_Height };
 		std::fill_n(m_pDepthBufferPixels, nrPixels, 1.f);
 		SDL_LockSurface(m_pBackBuffer);
@@ -44,6 +50,24 @@ namespace dae
 		SDL_BlitSurface(m_pBackBuffer, 0, m_pFrontBuffer, 0);
 		SDL_UpdateWindowSurface(m_pWindow);
 	}
+
+	void ProcessorCPU::ToggleBackgroundColor(bool useUniformBg)
+	{
+		m_BackgroundColor = (useUniformBg ? m_UniformColor : m_SoftwareColor) * 255.f; //Multiply color to fit the FillRect function
+	}
+
+	void dae::ProcessorCPU::ToggleNormalMap()
+	{
+		m_ShouldRenderNormals = !m_ShouldRenderNormals;
+	}
+
+	void ProcessorCPU::CycleShadingMode()
+	{
+		int count{ static_cast<int>(ShadingMode::COUNT) };
+		int currentMode{ static_cast<int>(m_ShadingMode) };
+		m_ShadingMode = static_cast<ShadingMode>((currentMode + 1) % count);
+	}
+
 
 	void ProcessorCPU::VertexTransformationFunction(Mesh* pMesh, const Camera* camera) const
 	{
@@ -64,6 +88,24 @@ namespace dae
 			vertexOut.viewDirection = (pMesh->GetWorldMatrix().TransformPoint(vertexIn.position) - camera->origin);
 			pMesh->GetVerticesOut().emplace_back(vertexOut);
 		}
+	}
+
+	inline bool ProcessorCPU::IsValidForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const
+	{
+		//calculate if all areas are possible
+		const bool isAreaV0V1Pos{ areaV0V1 >= 0.f };
+		const bool isAreaV1V2Pos{ areaV1V2 >= 0.f };
+		const bool isAreaV2V0Pos{ areaV2V0 >= 0.f };
+
+		const bool isPointInFront{ isAreaV0V1Pos && isAreaV1V2Pos && isAreaV2V0Pos };
+		const bool isPointInBack{ !isAreaV0V1Pos && !isAreaV1V2Pos && !isAreaV2V0Pos };
+
+		const bool isCullModeNoneValid{ (isPointInFront || isPointInBack)  && mode == CullMode::None };
+		const bool isCullModeFrontValid{ isPointInBack && mode == CullMode::Front};
+		const bool isCullModeBackValid{ isPointInFront && mode == CullMode::Back };
+
+
+		return isCullModeNoneValid || isCullModeFrontValid || isCullModeBackValid;
 	}
 
 	void ProcessorCPU::RenderMesh(std::vector<Mesh*>& meshes, const Camera* camera)
@@ -151,10 +193,8 @@ namespace dae
 				if (GeometryUtils::IsPointInTriangle(screenVertices[vertIdx0], screenVertices[vertIdx1],
 					screenVertices[vertIdx2], pixelCoordinates, signedAreaV0V1, signedAreaV1V2, signedAreaV2V0))
 				{
-					const bool isAreaV0V1Pos{ signedAreaV0V1 >= 0.f };
-					const bool isAreaV1V2Pos{ signedAreaV1V2 >= 0.f };
-					const bool isAreaV2V0Pos{ signedAreaV2V0 >= 0.f };
-
+					
+					if (!IsValidForCullMode(meshCullMode, signedAreaV0V1, signedAreaV1V2, signedAreaV2V0)) continue;
 					
 
 					//Calculate interpolated depth
@@ -225,12 +265,12 @@ namespace dae
 							pMesh->GetVerticesOut()[vertIdx2].viewDirection * inv2PosW * weightV2) * viewDepthInterpolated
 						};
 
-						VertexExt interpolatedVertex{};
+						VertexOut interpolatedVertex{};
 						interpolatedVertex.uv = pixelUV;
 						interpolatedVertex.normal = normal.Normalized();
 						interpolatedVertex.tangent = tangent.Normalized();
 						interpolatedVertex.viewDirection = viewDirection.Normalized();
-						finalColor = ColorRGB{};//PixelShading(interpolatedVertex);
+						finalColor = pMesh->ShadePixel(interpolatedVertex, m_ShadingMode, m_ShouldRenderNormals);
 					}
 					break;
 					case RenderMode::DepthBuffer:
@@ -239,7 +279,6 @@ namespace dae
 						finalColor = ColorRGB{ depthRemapped, depthRemapped, depthRemapped };
 					}
 					}
-
 
 					//Update Color in Buffer
 					finalColor.MaxToOne();
@@ -252,53 +291,4 @@ namespace dae
 			}
 		}
 	}
-
-	/*ColorRGB dae::Renderer::PixelShading(const Vertex_Out& v)
-	{
-		const float lightIntensity{ 7.f };
-		const float kd{ 1.f };
-		const float shininess{ 25.f };
-		Vector3 sampledNormal{ v.normal };
-		const ColorRGB ambient{ 0.025f, 0.025f, 0.025f };
-
-		if (m_ShouldRenderNormals)
-		{
-			const Vector3 binormal{ Vector3::Cross(v.normal, v.tangent) };
-			const Matrix tangentSpaceAxis{ v.tangent, binormal.Normalized(), v.normal, Vector3{0.f, 0.f, 0.f} };
-			sampledNormal = m_pNormalTexture->SampleNormal(v.uv);
-			sampledNormal = (2.f * sampledNormal) - Vector3{ 1.f, 1.f, 1.f };
-			sampledNormal = tangentSpaceAxis.TransformVector(sampledNormal);
-			sampledNormal.Normalize();
-		}
-
-		const float observedArea{ std::max(Vector3::Dot(sampledNormal, -m_LightDirection), 0.f) };
-		const ColorRGB observedAreaColor{ observedArea, observedArea, observedArea };
-		switch (m_ShadingMode)
-		{
-		case ShadingMode::Combined:
-		{
-			const ColorRGB diffuse{ dae::BRDF::Lambert(kd, m_pDiffuseTexture->Sample(v.uv)) * lightIntensity };
-			const ColorRGB specular{ BRDF::Phong(m_pSpecularTexture->Sample(v.uv), 1.f, m_pGlossinessTexture->Sample(v.uv).r * shininess,
-				m_LightDirection, -v.viewDirection, sampledNormal) };
-			return (diffuse + specular + ambient) * observedArea;
-		}
-		case ShadingMode::ObservedArea:
-		{
-			return observedAreaColor;
-		}
-		case ShadingMode::Diffuse:
-		{
-			const ColorRGB diffuse{ BRDF::Lambert(kd, m_pDiffuseTexture->Sample(v.uv) * lightIntensity) };
-			return diffuse * observedAreaColor;
-		}
-		case ShadingMode::Specular:
-		{
-			const ColorRGB specular{ BRDF::Phong(m_pSpecularTexture->Sample(v.uv), 1.f, m_pGlossinessTexture->Sample(v.uv).r * shininess,
-				m_LightDirection, -v.viewDirection, sampledNormal) };
-			return specular * observedAreaColor;
-		}
-		default:
-			return ColorRGB{};
-		}
-	}*/
 }

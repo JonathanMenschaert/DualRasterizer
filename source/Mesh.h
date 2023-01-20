@@ -33,6 +33,7 @@ namespace dae
 		bool ShouldRender() const;
 
 		CullMode GetCullMode() const;
+		ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals);
 
 	private:
 		Effect* m_pEffect{ nullptr };

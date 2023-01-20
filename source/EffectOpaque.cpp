@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "EffectOpaque.h"
 #include "Texture.h"
+#include "Utils.h"
 
 namespace dae
 {
@@ -188,7 +189,47 @@ namespace dae
 
 	ColorRGB EffectOpaque::ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals)
 	{
-		return ColorRGB();
+		Vector3 sampledNormal{ out.normal };
+
+		if (renderNormals)
+		{
+			const Vector3 binormal{ Vector3::Cross(out.normal, out.tangent) };
+			const Matrix tangentSpaceAxis{ out.tangent, binormal.Normalized(), out.normal, Vector3{0.f, 0.f, 0.f} };
+			sampledNormal = m_pNormalTexture->SampleNormal(out.uv);
+			sampledNormal = (2.f * sampledNormal) - Vector3{ 1.f, 1.f, 1.f };
+			sampledNormal = tangentSpaceAxis.TransformVector(sampledNormal);
+			sampledNormal.Normalize();
+		}
+
+		const float observedArea{ std::max(Vector3::Dot(sampledNormal, -m_LightDirection), 0.f) };
+		const ColorRGB observedAreaColor{ observedArea, observedArea, observedArea };
+		switch (shadingMode)
+		{
+		case ShadingMode::Combined:
+		{
+			const ColorRGB diffuse{ dae::BRDF::Lambert(m_Kd, m_pDiffuseTexture->Sample(out.uv)) * m_LightIntensity };
+			const ColorRGB specular{ BRDF::Phong(m_pSpecularTexture->Sample(out.uv), 1.f, m_pGlossinessTexture->Sample(out.uv).r * m_Shininess,
+				m_LightDirection, -out.viewDirection, sampledNormal) };
+			return (diffuse + specular + m_AmbientLight) * observedArea;
+		}
+		case ShadingMode::ObservedArea:
+		{
+			return observedAreaColor;
+		}
+		case ShadingMode::Diffuse:
+		{
+			const ColorRGB diffuse{ BRDF::Lambert(m_Kd, m_pDiffuseTexture->Sample(out.uv) * m_LightIntensity) };
+			return diffuse * observedAreaColor;
+		}
+		case ShadingMode::Specular:
+		{
+			const ColorRGB specular{ BRDF::Phong(m_pSpecularTexture->Sample(out.uv), 1.f, m_pGlossinessTexture->Sample(out.uv).r * m_Shininess,
+				m_LightDirection, -out.viewDirection, sampledNormal) };
+			return specular * observedAreaColor;
+		}
+		default:
+			return ColorRGB{};
+		}
 	}
 	
 }

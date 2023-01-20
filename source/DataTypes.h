@@ -46,8 +46,8 @@ namespace dae
 
 	enum class CullMode
 	{
-		Front,
 		Back,
+		Front,
 		None,
 
 		//Define mdoes above

@@ -14,6 +14,9 @@ namespace dae
 
 		ID3D11ShaderResourceView* GetSRV() const;
 
+		ColorRGB Sample(const Vector2& uv) const;
+		Vector3 SampleNormal(const Vector2& uv) const;
+
 		static Texture* LoadFromFile(ID3D11Device* pDevice, const std::string& path);
 
 	private:

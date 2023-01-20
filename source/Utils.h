@@ -180,17 +180,19 @@ namespace dae
 
 		inline bool IsPointInTriangle(const Vector2& v0, const Vector2& v1, const Vector2& v2, const Vector2& pixel,
 			float& signedAreaOutV0V1, float& signedAreaOutV1V2, float& signedAreaOutV2V0)
-		{
+		{			
 			signedAreaOutV0V1 = Vector2::Cross(v1 - v0, pixel - v0);
-			if (signedAreaOutV0V1 < 0.f) return false;
+			bool areaV0V1Pos{ signedAreaOutV0V1 >= 0.f };			
 
 			signedAreaOutV1V2 = Vector2::Cross(v2 - v1, pixel - v1);
-			if (signedAreaOutV1V2 < 0.f) return false;
+			bool areaV1V2Pos{ signedAreaOutV1V2 >= 0.f };
 
 			signedAreaOutV2V0 = Vector2::Cross(v0 - v2, pixel - v2);
-			if (signedAreaOutV2V0 < 0.f) return false;
+			bool areaV2V0Pos{ signedAreaOutV2V0 >= 0.f };
 
-			return true;
+			bool haveAreasSameSign{ areaV0V1Pos == areaV1V2Pos && areaV0V1Pos == areaV2V0Pos };
+
+			return haveAreasSameSign;
 		}
 
 		inline bool IsPointInTriangle(const Vector2& v0, const Vector2& v1, const Vector2& v2, const Vector2& pixel)

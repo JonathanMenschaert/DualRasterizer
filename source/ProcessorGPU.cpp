@@ -26,6 +26,8 @@ namespace dae
 		{
 			std::cout << "DirectX initialization failed!\n";
 		}
+
+		m_BackgroundColor = m_HardwareColor;
 	}
 
 	ProcessorGPU::~ProcessorGPU()
@@ -42,9 +44,7 @@ namespace dae
 		if (!m_IsInitialized) return;
 
 		//1. Clear RTV & DSV
-		//ColorRGB clearColor = ColorRGB{ 0.39f, 0.59f, 0.93f };
-		ColorRGB clearColor = ColorRGB{ 0.f, 0.f, 0.3f };
-		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, &clearColor.r);
+		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, &m_BackgroundColor.r);
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
 		//2. Set Pipeline + Invoke Drawcalls (= render)
@@ -56,6 +56,11 @@ namespace dae
 
 		//3. Present Backbuffer (swap)
 		m_pSwapChain->Present(0, 0);
+	}
+
+	void ProcessorGPU::ToggleBackgroundColor(bool useUniformBg)
+	{
+		m_BackgroundColor = (useUniformBg ? m_UniformColor : m_HardwareColor);
 	}
 
 	HRESULT ProcessorGPU::InitializeDirectX()

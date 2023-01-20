@@ -25,7 +25,7 @@ namespace dae
 			const string& normalPath, const string& specularPath, const string& glossinessPath);
 
 		virtual ID3D11InputLayout* CreateInputLayout(ID3D11Device* pDevice) const override;
-		virtual ColorRGB ShadePixel(const VertexOut& out) override;
+		virtual ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals) override;
 
 	private:
 		ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVar{ nullptr };
@@ -37,5 +37,11 @@ namespace dae
 		Texture* m_pNormalTexture{ nullptr };
 		Texture* m_pSpecularTexture{ nullptr };
 		Texture* m_pGlossinessTexture{ nullptr };
+
+		const float m_LightIntensity{ 7.f };
+		const float m_Kd{ 1.f };
+		const float m_Shininess{ 25.f };
+		const ColorRGB m_AmbientLight{ 0.025f, 0.025f, 0.025f };
+		const Vector3 m_LightDirection{ 0.577f, -0.577f, 0.577f };
     };
 }

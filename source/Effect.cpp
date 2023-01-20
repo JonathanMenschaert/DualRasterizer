@@ -187,6 +187,7 @@ namespace dae
 		HRESULT result{ pDevice->CreateSamplerState(&sampleDesc, &pSamplerState) };
 		if (FAILED(result))
 		{
+			if (pSamplerState) pSamplerState->Release();
 			std::wcout << L"Failed to create new Sampler State!\n";
 			return;
 		}
@@ -197,6 +198,7 @@ namespace dae
 		{
 			std::wcout << L"Failed to update Sampler State\n";
 		}
+		if (pSamplerState) pSamplerState->Release();
 	}
 
 	//Rasterizer desc: https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_rasterizer_desc
@@ -239,6 +241,7 @@ namespace dae
 		HRESULT result{ pDevice->CreateRasterizerState(&rastDesc, &pRasterizerState) };
 		if (FAILED(result))
 		{
+			if (pRasterizerState) pRasterizerState->Release();
 			std::wcout << L"Failed to create new Rasterizer State!\n";
 			return;
 		}
@@ -247,6 +250,7 @@ namespace dae
 		{
 			std::wcout << L"Failed to update Rasterizer State!\n";
 		}
+		if (pRasterizerState) pRasterizerState->Release();
 	}
 
 	CullMode Effect::GetCullMode() const

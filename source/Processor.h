@@ -19,11 +19,15 @@ namespace dae
 		Processor& operator=(Processor&& processor) noexcept = delete;
 
 		virtual void Render(std::vector<Mesh*>& meshes, const Camera* camera) = 0;
+		virtual void ToggleBackgroundColor(bool useUniformBg) = 0;
 
 	protected:
 		SDL_Window* m_pWindow{nullptr};
 		int m_Width{};
 		int m_Height{};
+		ColorRGB m_BackgroundColor{};
+
+		static const ColorRGB m_UniformColor;
 	};
 }
 

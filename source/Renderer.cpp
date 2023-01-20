@@ -128,6 +128,23 @@ namespace dae {
 		}
 	}
 
+	void Renderer::ToggleNormalMap()
+	{
+		m_pProcessorCPU->ToggleNormalMap();
+	}
+
+	void Renderer::CycleShadingMode()
+	{
+		m_pProcessorCPU->CycleShadingMode();
+	}
+
+	void Renderer::ToggleUniformColor()
+	{
+		m_IsBackgroundUniform = !m_IsBackgroundUniform;
+		m_pProcessorCPU->ToggleBackgroundColor(m_IsBackgroundUniform);
+		m_pProcessorGPU->ToggleBackgroundColor(m_IsBackgroundUniform);
+	}
+
 	void Renderer::InitMeshes(ID3D11Device* pDevice)
 	{
 		std::vector<Vertex> vertices{};

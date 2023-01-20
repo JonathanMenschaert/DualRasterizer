@@ -151,7 +151,7 @@ namespace dae
 	}
 	CullMode Mesh::GetCullMode() const
 	{
-		return CullMode();
+		return m_pEffect->GetCullMode();
 	}
 	ColorRGB Mesh::ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals)
 	{

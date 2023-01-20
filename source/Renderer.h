@@ -29,6 +29,9 @@ namespace dae
 		void ToggleFireFx();
 		void CycleSamplerState();
 		void CycleCullMode();
+		void ToggleNormalMap();
+		void CycleShadingMode();
+		void ToggleUniformColor();
 
 	private:
 
@@ -54,6 +57,9 @@ namespace dae
 
 		std::vector<Mesh*> m_Meshes{};
 		Camera m_Camera{};
+
+		//Background color
+		bool m_IsBackgroundUniform{ false };
 
 		//DirectX
 		ID3D11Device* m_pDevice;

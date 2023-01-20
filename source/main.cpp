@@ -65,14 +65,29 @@ int main(int argc, char* args[])
 				case SDL_SCANCODE_F2:
 					pRenderer->ToggleRotation(); //Turn rotation on or off
 					break;
-				case SDL_SCANCODE_F3:
-					pRenderer->ToggleFireFx();
+				case SDL_SCANCODE_F3: 
+					pRenderer->ToggleFireFx(); //Turn fire on or off
 					break;
 				case SDL_SCANCODE_F4:
-					pRenderer->CycleSamplerState();
+					pRenderer->CycleSamplerState(); //Cycle through Point, linear or anisotropic sampling
+					break;
+				case SDL_SCANCODE_F5:
+					pRenderer->CycleShadingMode(); //Cycle through shading
+					break;
+				case SDL_SCANCODE_F6:
+					pRenderer->ToggleNormalMap(); //Turn normals on or off
+					break;
+				case SDL_SCANCODE_F7:
+					//pRenderer->ToggleNormalMap(); //Turn on depth buffer visualisation
+					break;
+				case SDL_SCANCODE_F8:
+					//pRenderer->ToggleNormalMap(); //Turn on boundingbox visualisation
 					break;
 				case SDL_SCANCODE_F9:
 					pRenderer->CycleCullMode();
+					break;
+				case SDL_SCANCODE_F10:
+					pRenderer->ToggleUniformColor(); //Toggle uniform background color
 					break;
 				case SDL_SCANCODE_F11:
 					showFps = !showFps; //Toggle printing of fps

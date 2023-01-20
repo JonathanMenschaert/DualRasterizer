@@ -16,7 +16,8 @@ namespace dae
 		ProcessorGPU& operator=(ProcessorGPU&& processor) noexcept = delete;
 
 		virtual void Render(std::vector<Mesh*>& meshes, const Camera* camera) override;
-	
+		virtual void ToggleBackgroundColor(bool useUniformBg) override;
+
 	private:
 		
 		//DirectX
@@ -26,6 +27,8 @@ namespace dae
 
 		//Member variables
 		bool m_IsInitialized{ false };
+
+		const ColorRGB m_HardwareColor{ 0.39f, 0.59f, 0.93f };
 
 		ID3D11Device* m_pDevice;
 		ID3D11DeviceContext* m_pDeviceContext;

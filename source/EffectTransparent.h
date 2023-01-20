@@ -21,7 +21,7 @@ namespace dae
 		static EffectTransparent* CreateEffect(ID3D11Device* pDevice, const std::wstring& fxPath, const string& diffusePath);
 
 		virtual ID3D11InputLayout* CreateInputLayout(ID3D11Device* pDevice) const override;
-		virtual ColorRGB ShadePixel(const VertexOut& out) override;
+		virtual ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals) override;
 		virtual void CycleCullMode(ID3D11Device* pDevice) override;
 
 	private:
