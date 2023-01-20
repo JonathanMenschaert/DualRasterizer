@@ -45,12 +45,12 @@ namespace dae
 		SDL_UpdateWindowSurface(m_pWindow);
 	}
 
-	void ProcessorCPU::VertexTransformationFunction(Mesh* mesh, const Camera* camera) const
+	void ProcessorCPU::VertexTransformationFunction(Mesh* pMesh, const Camera* camera) const
 	{
-		mesh->GetVerticesOut().clear();
-		mesh->GetVerticesOut().reserve(mesh->GetVertices().size());
-		const Matrix worldViewProjectionMatrix{ mesh->GetWorldMatrix() * camera->viewMatrix * camera->projectionMatrix };
-		for (const auto& vertexIn : mesh->GetVertices())
+		pMesh->GetVerticesOut().clear();
+		pMesh->GetVerticesOut().reserve(pMesh->GetVertices().size());
+		const Matrix worldViewProjectionMatrix{ pMesh->GetWorldMatrix() * camera->viewMatrix * camera->projectionMatrix };
+		for (const auto& vertexIn : pMesh->GetVertices())
 		{
 			VertexOut vertexOut{ Vector4{ vertexIn.position, 1.f}, vertexIn.uv, vertexIn.normal, 
 				vertexIn.tangent, vertexIn.viewDirection };
@@ -59,22 +59,23 @@ namespace dae
 			vertexOut.position.x *= perspectiveDiv;
 			vertexOut.position.y *= perspectiveDiv;
 			vertexOut.position.z *= perspectiveDiv;
-			vertexOut.normal = mesh->GetWorldMatrix().TransformVector(vertexIn.normal);
-			vertexOut.tangent = mesh->GetWorldMatrix().TransformVector(vertexIn.tangent);
-			vertexOut.viewDirection = (mesh->GetWorldMatrix().TransformPoint(vertexIn.position) - camera->origin);
-			mesh->GetVerticesOut().emplace_back(vertexOut);
+			vertexOut.normal = pMesh->GetWorldMatrix().TransformVector(vertexIn.normal);
+			vertexOut.tangent = pMesh->GetWorldMatrix().TransformVector(vertexIn.tangent);
+			vertexOut.viewDirection = (pMesh->GetWorldMatrix().TransformPoint(vertexIn.position) - camera->origin);
+			pMesh->GetVerticesOut().emplace_back(vertexOut);
 		}
 	}
 
 	void ProcessorCPU::RenderMesh(std::vector<Mesh*>& meshes, const Camera* camera)
 	{
-		for (Mesh* mesh : meshes)
+		for (Mesh* pMesh : meshes)
 		{
+			if (!pMesh->ShouldRender()) continue;
 			//Check this later
-			VertexTransformationFunction(mesh, camera);
+			VertexTransformationFunction(pMesh, camera);
 			std::vector<Vector2> screenVertices;
-			screenVertices.reserve(mesh->GetVerticesOut().size());
-			for (const auto& vertexNdc : mesh->GetVerticesOut())
+			screenVertices.reserve(pMesh->GetVerticesOut().size());
+			for (const auto& vertexNdc : pMesh->GetVerticesOut())
 			{
 				screenVertices.emplace_back(
 					Vector2{
@@ -84,24 +85,23 @@ namespace dae
 				);
 			}
 
-			switch (mesh->GetPrimitiveTopology())
+			switch (pMesh->GetPrimitiveTopology())
 			{
 			case PrimitiveTopology::TriangleStrip:
 			{
-				const uint32_t numIndices{ static_cast<uint32_t>(mesh->GetIndices().size() - 2)};
+				const uint32_t numIndices{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2)};
 				concurrency::parallel_for(0u, numIndices, [=, this](uint32_t vertIdx)
 					{
-						RenderMeshTriangle(mesh, screenVertices, vertIdx, vertIdx & 1);
+						RenderMeshTriangle(pMesh, screenVertices, vertIdx, vertIdx & 1);
 					}
 				);
 				break;
 			}
 			case PrimitiveTopology::TriangleList:
-				const uint32_t numTriangles{ static_cast<uint32_t>(mesh->GetIndices().size() - 2) / 3 };
+				const uint32_t numTriangles{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2) / 3 };
 				concurrency::parallel_for(0u, numTriangles, [=, this](uint32_t vertIdx)
 					{
-						RenderMeshTriangle(mesh, screenVertices, vertIdx * 3);
-
+						RenderMeshTriangle(pMesh, screenVertices, vertIdx * 3);
 					}
 				);
 				break;
@@ -109,24 +109,26 @@ namespace dae
 		}
 	}
 
-	void ProcessorCPU::RenderMeshTriangle(Mesh* mesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices)
+	void ProcessorCPU::RenderMeshTriangle(Mesh* pMesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices)
 	{
 		//Get vertex from the index vector.
 		//The vertices will be swapped when vertIdx is uneven and the TriangleStrip primitive topology is set
-		const uint32_t vertIdx0{ mesh->GetIndices()[vertIdx + swapVertices * 2] };
-		const uint32_t vertIdx1{ mesh->GetIndices()[vertIdx + 1] };
-		const uint32_t vertIdx2{ mesh->GetIndices()[vertIdx + !swapVertices * 2] };
+		const uint32_t vertIdx0{ pMesh->GetIndices()[vertIdx + swapVertices * 2] };
+		const uint32_t vertIdx1{ pMesh->GetIndices()[vertIdx + 1] };
+		const uint32_t vertIdx2{ pMesh->GetIndices()[vertIdx + !swapVertices * 2] };
 
 		//Check If the same vertex is retrieved twice. This is used for the TriangleStrip topology.
 		if (vertIdx0 == vertIdx1 || vertIdx1 == vertIdx2 || vertIdx2 == vertIdx0) return;
 
 		//Check if all of the retrieved vertices are within the frustrum.
-		if (!GeometryUtils::IsVertexInFrustrum(mesh->GetVerticesOut()[vertIdx0].position)
-			|| !GeometryUtils::IsVertexInFrustrum(mesh->GetVerticesOut()[vertIdx1].position)
-			|| !GeometryUtils::IsVertexInFrustrum(mesh->GetVerticesOut()[vertIdx2].position))
+		if (!GeometryUtils::IsVertexInFrustrum(pMesh->GetVerticesOut()[vertIdx0].position)
+			|| !GeometryUtils::IsVertexInFrustrum(pMesh->GetVerticesOut()[vertIdx1].position)
+			|| !GeometryUtils::IsVertexInFrustrum(pMesh->GetVerticesOut()[vertIdx2].position))
 		{
 			return;
 		}
+
+		CullMode meshCullMode{ pMesh->GetCullMode() };
 
 		//Create boundingbox around triangle
 		Vector2 boundingBoxMin{ Vector2::Min(screenVertices[vertIdx0], Vector2::Min(screenVertices[vertIdx1], screenVertices[vertIdx2])) };
@@ -149,6 +151,11 @@ namespace dae
 				if (GeometryUtils::IsPointInTriangle(screenVertices[vertIdx0], screenVertices[vertIdx1],
 					screenVertices[vertIdx2], pixelCoordinates, signedAreaV0V1, signedAreaV1V2, signedAreaV2V0))
 				{
+					const bool isAreaV0V1Pos{ signedAreaV0V1 >= 0.f };
+					const bool isAreaV1V2Pos{ signedAreaV1V2 >= 0.f };
+					const bool isAreaV2V0Pos{ signedAreaV2V0 >= 0.f };
+
+					
 
 					//Calculate interpolated depth
 					const float triangleArea{ 1.f / (Vector2::Cross(screenVertices[vertIdx1] - screenVertices[vertIdx0],
@@ -160,9 +167,9 @@ namespace dae
 
 					const float depthInterpolated
 					{
-						1.f / (1.f / mesh->GetVerticesOut()[vertIdx0].position.z * weightV0 +
-						1.f / mesh->GetVerticesOut()[vertIdx1].position.z * weightV1 +
-						1.f / mesh->GetVerticesOut()[vertIdx2].position.z * weightV2)
+						1.f / (1.f / pMesh->GetVerticesOut()[vertIdx0].position.z * weightV0 +
+						1.f / pMesh->GetVerticesOut()[vertIdx1].position.z * weightV1 +
+						1.f / pMesh->GetVerticesOut()[vertIdx2].position.z * weightV2)
 					};
 
 					//Compare calculated depth to the depth already stored in the depthbuffer. 
@@ -179,9 +186,9 @@ namespace dae
 					case RenderMode::FinalColor:
 					{
 
-						const float inv0PosW{ 1.f / mesh->GetVerticesOut()[vertIdx0].position.w };
-						const float inv1PosW{ 1.f / mesh->GetVerticesOut()[vertIdx1].position.w };
-						const float inv2PosW{ 1.f / mesh->GetVerticesOut()[vertIdx2].position.w };
+						const float inv0PosW{ 1.f / pMesh->GetVerticesOut()[vertIdx0].position.w };
+						const float inv1PosW{ 1.f / pMesh->GetVerticesOut()[vertIdx1].position.w };
+						const float inv2PosW{ 1.f / pMesh->GetVerticesOut()[vertIdx2].position.w };
 
 						const float viewDepthInterpolated
 						{
@@ -192,30 +199,30 @@ namespace dae
 
 						const Vector2 pixelUV
 						{
-							(mesh->GetVerticesOut()[vertIdx0].uv * inv0PosW * weightV0 +
-							mesh->GetVerticesOut()[vertIdx1].uv * inv1PosW * weightV1 +
-							mesh->GetVerticesOut()[vertIdx2].uv * inv2PosW * weightV2) * viewDepthInterpolated
+							(pMesh->GetVerticesOut()[vertIdx0].uv * inv0PosW * weightV0 +
+							pMesh->GetVerticesOut()[vertIdx1].uv * inv1PosW * weightV1 +
+							pMesh->GetVerticesOut()[vertIdx2].uv * inv2PosW * weightV2) * viewDepthInterpolated
 						};
 
 						const Vector3 normal
 						{
-							(mesh->GetVerticesOut()[vertIdx0].normal * inv0PosW * weightV0 +
-							mesh->GetVerticesOut()[vertIdx1].normal * inv1PosW * weightV1 +
-							mesh->GetVerticesOut()[vertIdx2].normal * inv2PosW * weightV2) * viewDepthInterpolated
+							(pMesh->GetVerticesOut()[vertIdx0].normal * inv0PosW * weightV0 +
+							pMesh->GetVerticesOut()[vertIdx1].normal * inv1PosW * weightV1 +
+							pMesh->GetVerticesOut()[vertIdx2].normal * inv2PosW * weightV2) * viewDepthInterpolated
 						};
 
 						const Vector3 tangent
 						{
-							(mesh->GetVerticesOut()[vertIdx0].tangent * inv0PosW * weightV0 +
-							mesh->GetVerticesOut()[vertIdx1].tangent * inv1PosW * weightV1 +
-							mesh->GetVerticesOut()[vertIdx2].tangent * inv2PosW * weightV2) * viewDepthInterpolated
+							(pMesh->GetVerticesOut()[vertIdx0].tangent * inv0PosW * weightV0 +
+							pMesh->GetVerticesOut()[vertIdx1].tangent * inv1PosW * weightV1 +
+							pMesh->GetVerticesOut()[vertIdx2].tangent * inv2PosW * weightV2) * viewDepthInterpolated
 						};
 
 						const Vector3 viewDirection
 						{
-							(mesh->GetVerticesOut()[vertIdx0].viewDirection * inv0PosW * weightV0 +
-							mesh->GetVerticesOut()[vertIdx1].viewDirection * inv1PosW * weightV1 +
-							mesh->GetVerticesOut()[vertIdx2].viewDirection * inv2PosW * weightV2) * viewDepthInterpolated
+							(pMesh->GetVerticesOut()[vertIdx0].viewDirection * inv0PosW * weightV0 +
+							pMesh->GetVerticesOut()[vertIdx1].viewDirection * inv1PosW * weightV1 +
+							pMesh->GetVerticesOut()[vertIdx2].viewDirection * inv2PosW * weightV2) * viewDepthInterpolated
 						};
 
 						VertexExt interpolatedVertex{};

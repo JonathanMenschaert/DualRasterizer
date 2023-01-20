@@ -26,6 +26,9 @@ namespace dae
 
 		void ToggleProcessor();
 		void ToggleRotation();
+		void ToggleFireFx();
+		void CycleSamplerState();
+		void CycleCullMode();
 
 	private:
 
@@ -50,8 +53,12 @@ namespace dae
 		const float m_RotationSpeed{ TO_RADIANS * 45.f };
 
 		std::vector<Mesh*> m_Meshes{};
-
 		Camera m_Camera{};
+
+		//DirectX
+		ID3D11Device* m_pDevice;
+		ID3D11DeviceContext* m_pDeviceContext;
+
 		
 		//Processors
 		Processor* m_pRenderProcessor;

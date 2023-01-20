@@ -49,6 +49,9 @@ namespace dae
 		{
 			std::wcout << L"m_pGlossinessMapVar not valid\n";
 		}
+
+		//Set Cullmode
+		m_CullMode = CullMode::Back;
 	}
 
 	EffectOpaque::~EffectOpaque()
@@ -182,4 +185,10 @@ namespace dae
 
 		return pInputLayout;
 	}
+
+	ColorRGB EffectOpaque::ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals)
+	{
+		return ColorRGB();
+	}
+	
 }

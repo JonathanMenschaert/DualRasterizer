@@ -28,8 +28,8 @@ namespace dae
 		float* m_pDepthBufferPixels{};
 
 		void RenderMesh(std::vector<Mesh*>& meshes, const Camera* camera);
-		void RenderMeshTriangle(Mesh* mesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices = false);
-		void VertexTransformationFunction(Mesh* mesh, const Camera* camera) const;
+		void RenderMeshTriangle(Mesh* pMesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices = false);
+		void VertexTransformationFunction(Mesh* pMesh, const Camera* camera) const;
 
 		enum class RenderMode
 		{

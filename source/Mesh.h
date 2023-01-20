@@ -17,7 +17,6 @@ namespace dae
 		Mesh& operator=(const Mesh&) = delete;
 		Mesh& operator=(Mesh&&) noexcept = delete;
 
-		void UpdateSampleState(ID3D11SamplerState* pSampleState);
 		void RotateY(float angle);
 		void Render(ID3D11DeviceContext* pDeviceContext) const;
 		void SetMatrices(const Matrix& viewProjMatrix, const Matrix& inverseViewMatrix);
@@ -27,6 +26,13 @@ namespace dae
 		const std::vector<uint32_t>& GetIndices() const;
 		const Matrix& GetWorldMatrix() const;
 		PrimitiveTopology GetPrimitiveTopology() const;
+
+		void ToggleRender();
+		void CycleCullMode(ID3D11Device* pDevice);
+		void CycleSamplerState(ID3D11Device* pDevice);
+		bool ShouldRender() const;
+
+		CullMode GetCullMode() const;
 
 	private:
 		Effect* m_pEffect{ nullptr };
@@ -45,6 +51,8 @@ namespace dae
 		std::vector<VertexExt> m_Vertices{};
 		std::vector<VertexOut> m_VerticesOut{};
 		std::vector<uint32_t> m_Indices{};
+
+		bool m_ShouldRender{ true };
 	};
 }
 

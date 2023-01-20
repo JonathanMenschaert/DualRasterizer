@@ -30,21 +30,12 @@ namespace dae
 
 	ProcessorGPU::~ProcessorGPU()
 	{
-		if (m_pSamplerState) m_pSamplerState->Release();
 		if (m_pRenderTargetView) m_pRenderTargetView->Release();
 		if (m_pRenderTargetBuffer) m_pRenderTargetBuffer->Release();
 		if (m_pDepthStencilView) m_pDepthStencilView->Release();
 		if (m_pDepthStencilBuffer) m_pDepthStencilBuffer->Release();
 		if (m_pSwapChain) m_pSwapChain->Release();
-		if (m_pDeviceContext)
-		{
-			m_pDeviceContext->ClearState();
-			m_pDeviceContext->Flush();
-			m_pDeviceContext->Release();
-		}
-		if (m_pDevice) m_pDevice->Release();
 	}
-
 
 	void ProcessorGPU::Render(std::vector<Mesh*>& meshes, const Camera* camera)
 	{
@@ -59,6 +50,7 @@ namespace dae
 		//2. Set Pipeline + Invoke Drawcalls (= render)
 		for (Mesh* pMesh : meshes)
 		{
+			if (!pMesh->ShouldRender()) continue;
 			pMesh->Render(m_pDeviceContext);
 		}
 

@@ -15,7 +15,6 @@ namespace dae
 		ProcessorGPU& operator=(const ProcessorGPU& processor) = delete;
 		ProcessorGPU& operator=(ProcessorGPU&& processor) noexcept = delete;
 
-
 		virtual void Render(std::vector<Mesh*>& meshes, const Camera* camera) override;
 	
 	private:
@@ -38,8 +37,17 @@ namespace dae
 		ID3D11Resource* m_pRenderTargetBuffer;
 		ID3D11RenderTargetView* m_pRenderTargetView;
 
-		ID3D11SamplerState* m_pSamplerState{ nullptr };
+		enum class SampleState
+		{
+			POINT,
+			LINEAR,
+			ANISOTROPIC,
+			//Define samplestates above
 
+			COUNT
+		};
+
+		SampleState m_SamplerState{ SampleState::POINT };
 	};
 }
 

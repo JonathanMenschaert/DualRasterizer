@@ -223,17 +223,23 @@ namespace dae
 
 	namespace BRDF
 	{
-		static ColorRGB Lambert(float kd, const ColorRGB& cd)
+		inline ColorRGB ObservedArea(const Vector3& normal, const Vector3& lightDir)
+		{
+			const float observedArea{ std::max(Vector3::Dot(normal, lightDir), 0.f)};
+			return observedArea * ColorRGB{ 1, 1, 1 };
+		}
+
+		inline ColorRGB Lambert(float kd, const ColorRGB& cd)
 		{
 			return (cd * kd) / PI;
 		}
 
-		static ColorRGB Lambert(const ColorRGB& kd, const ColorRGB& cd)
+		inline ColorRGB Lambert(const ColorRGB& kd, const ColorRGB& cd)
 		{
 			return (cd * kd) / PI;
 		}
 
-		static ColorRGB Phong(const ColorRGB specularColor, float ks, float exp, const Vector3& l, const Vector3& v, const Vector3& n)
+		inline ColorRGB Phong(const ColorRGB specularColor, float ks, float exp, const Vector3& l, const Vector3& v, const Vector3& n)
 		{
 
 			const Vector3 reflect{ Vector3::Reflect(l, n) };

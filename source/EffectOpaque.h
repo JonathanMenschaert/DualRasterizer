@@ -24,7 +24,8 @@ namespace dae
 		static EffectOpaque* CreateEffect(ID3D11Device* pDevice, const std::wstring& fxPath, const string& diffusePath, 
 			const string& normalPath, const string& specularPath, const string& glossinessPath);
 
-		virtual ID3D11InputLayout* CreateInputLayout(ID3D11Device* pDevice) const;
+		virtual ID3D11InputLayout* CreateInputLayout(ID3D11Device* pDevice) const override;
+		virtual ColorRGB ShadePixel(const VertexOut& out) override;
 
 	private:
 		ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVar{ nullptr };

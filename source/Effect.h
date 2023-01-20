@@ -1,4 +1,5 @@
 #pragma once
+#include "DataTypes.h"
 namespace dae
 {
 	class Effect
@@ -22,11 +23,25 @@ namespace dae
 		void SetWorldMatrix(const Matrix& matrix);
 		void SetViewInverseMatrix(const Matrix& matrix);
 
+		virtual ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals) = 0;
+		virtual void CycleSamplerState(ID3D11Device* pDevice);
+		virtual void CycleCullMode(ID3D11Device* pDevice);
+
+		CullMode GetCullMode() const;
+
 	protected:
 		ID3DX11Effect* m_pEffect{ nullptr };
 		ID3DX11EffectTechnique* m_pTechnique{ nullptr };
 		ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVar{ nullptr };
 		ID3DX11EffectMatrixVariable* m_pMatWorldVar{ nullptr };
 		ID3DX11EffectMatrixVariable* m_pMatViewInverseVar{ nullptr };
+
+		
+		ID3DX11EffectSamplerVariable* m_pSamplerEffect;
+		ID3DX11EffectRasterizerVariable* m_pRasterizerEffect;
+		
+
+		CullMode m_CullMode{CullMode::None};
+		SampleState m_SamplerState{ SampleState::Point};
 	};
 }

@@ -20,6 +20,9 @@ namespace dae
 		{
 			std::wcout << L"m_pDiffuseMapVar not valid\n";
 		}
+
+		//Set Cullmode
+		m_CullMode = CullMode::None;
 	}
 
 	EffectTransparent::~EffectTransparent()
@@ -31,8 +34,9 @@ namespace dae
 	//Diffuse map should be set at effect initialisation
 	void EffectTransparent::SetDiffuseMap(Texture* pDiffuseTexture)
 	{
-		if (m_pDiffuseMapVar)
+		if (m_pDiffuseMapVar && pDiffuseTexture)
 		{
+			m_pDiffuseTexture = pDiffuseTexture;
 			m_pDiffuseMapVar->SetResource(pDiffuseTexture->GetSRV());
 		}
 	}
@@ -102,5 +106,15 @@ namespace dae
 		}
 
 		return pInputLayout;
+	}
+
+	ColorRGB EffectTransparent::ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals)
+	{
+		return ColorRGB();
+	}
+	
+	void EffectTransparent::CycleCullMode(ID3D11Device* pDevice)
+	{
+		//Cullmode for transparency is not changed
 	}
 }

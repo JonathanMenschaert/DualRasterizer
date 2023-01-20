@@ -65,6 +65,15 @@ int main(int argc, char* args[])
 				case SDL_SCANCODE_F2:
 					pRenderer->ToggleRotation(); //Turn rotation on or off
 					break;
+				case SDL_SCANCODE_F3:
+					pRenderer->ToggleFireFx();
+					break;
+				case SDL_SCANCODE_F4:
+					pRenderer->CycleSamplerState();
+					break;
+				case SDL_SCANCODE_F9:
+					pRenderer->CycleCullMode();
+					break;
 				case SDL_SCANCODE_F11:
 					showFps = !showFps; //Toggle printing of fps
 					break;

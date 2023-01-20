@@ -28,8 +28,40 @@ namespace dae
 
 	enum class PrimitiveTopology
 	{
+		//Assign the value of the directx primitive topologies to the local topologies
+		//This way a single variable can be used for both the hardware and the software rasterizer
 		TriangleList = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
 		TriangleStrip = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP
+	};
+
+	enum class ShadingMode
+	{
+		Combined,
+		ObservedArea,
+		Diffuse,
+		Specular,
+		//Define modes above
+		COUNT
+	};
+
+	enum class CullMode
+	{
+		Front,
+		Back,
+		None,
+
+		//Define mdoes above
+		COUNT
+	};
+
+	enum class SampleState
+	{
+		Point,
+		Linear,
+		Anisotropic,
+		//Define samplestates above
+
+		COUNT
 	};
 }
 

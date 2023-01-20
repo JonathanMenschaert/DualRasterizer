@@ -71,18 +71,6 @@ namespace dae
 	}
 
 
-	void Mesh::UpdateSampleState(ID3D11SamplerState* pSampleState)
-	{
-		ID3DX11EffectSamplerVariable* pSamplerEffect{ m_pEffect->GetEffect()->GetVariableByName("gSampleState")->AsSampler() };
-		HRESULT result{ pSamplerEffect->SetSampler(0, pSampleState) };
-		if (FAILED(result))
-		{
-			std::wcout << L"Failed to update mesh sampler state\n";
-			return;
-		}
-	}
-
-
 	void Mesh::RotateY(float angle)
 	{
 		m_RotationMatrix = Matrix::CreateRotationY(angle) * m_RotationMatrix;
@@ -142,5 +130,31 @@ namespace dae
 	PrimitiveTopology Mesh::GetPrimitiveTopology() const
 	{
 		return m_Topology;
+	}
+	void Mesh::ToggleRender()
+	{
+		m_ShouldRender = !m_ShouldRender;
+	}
+	void Mesh::CycleCullMode(ID3D11Device* pDevice)
+	{
+		m_pEffect->CycleCullMode(pDevice);
+	}
+
+	void Mesh::CycleSamplerState(ID3D11Device* pDevice)
+	{
+		m_pEffect->CycleSamplerState(pDevice);
+	}
+
+	bool Mesh::ShouldRender() const
+	{
+		return m_ShouldRender;
+	}
+	CullMode Mesh::GetCullMode() const
+	{
+		return CullMode();
+	}
+	ColorRGB Mesh::ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals)
+	{
+		return m_pEffect->ShadePixel(out, shadingMode, renderNormals);
 	}
 }

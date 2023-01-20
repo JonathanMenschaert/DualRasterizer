@@ -25,15 +25,13 @@ namespace dae {
 #if defined(DEBUG) || defined(_DEBUG)
 		createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-		ID3D11Device* pDevice;
-		ID3D11DeviceContext* pDeviceContext;
 		HRESULT result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, createDeviceFlags, &featureLevel, 1, D3D11_SDK_VERSION,
-			&pDevice, nullptr, &pDeviceContext);
+			&m_pDevice, nullptr, &m_pDeviceContext);
 
 		if (result == S_OK)
 		{
 			m_IsInitialized = true;
-			InitMeshes(pDevice);
+			InitMeshes(m_pDevice);
 			std::cout << "Device and DeviceContext are initialized and ready!\n";
 		}
 		else
@@ -41,7 +39,7 @@ namespace dae {
 			std::cout << "Device or DeviceContext initialization failed!\n";
 		}
 
-		m_pProcessorGPU = new ProcessorGPU(pDevice, pDeviceContext, pWindow);
+		m_pProcessorGPU = new ProcessorGPU(m_pDevice, m_pDeviceContext, pWindow);
 		m_pProcessorCPU = new ProcessorCPU(pWindow);
 		m_pRenderProcessor = m_pProcessorCPU;		
 	}
@@ -60,6 +58,13 @@ namespace dae {
 		delete m_pProcessorCPU;
 		m_pProcessorCPU = nullptr;
 
+		if (m_pDeviceContext)
+		{
+			m_pDeviceContext->ClearState();
+			m_pDeviceContext->Flush();
+			m_pDeviceContext->Release();
+		}
+		if (m_pDevice) m_pDevice->Release();
 	}
 
 	void Renderer::Update(const Timer* pTimer)
@@ -100,6 +105,27 @@ namespace dae {
 	void Renderer::ToggleRotation()
 	{
 		m_ShouldRotate = !m_ShouldRotate;
+	}
+
+	void Renderer::ToggleFireFx()
+	{
+		m_Meshes[1]->ToggleRender();
+	}
+
+	void Renderer::CycleSamplerState()
+	{
+		for (Mesh* pMesh : m_Meshes)
+		{
+			pMesh->CycleSamplerState(m_pDevice);
+		}
+	}
+
+	void Renderer::CycleCullMode()
+	{
+		for (Mesh* pMesh : m_Meshes)
+		{
+			pMesh->CycleCullMode(m_pDevice);
+		}
 	}
 
 	void Renderer::InitMeshes(ID3D11Device* pDevice)
