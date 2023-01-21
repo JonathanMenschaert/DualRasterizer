@@ -32,6 +32,8 @@ namespace dae
 		void ToggleNormalMap();
 		void CycleShadingMode();
 		void ToggleUniformColor();
+		void ToggleBoundingBoxes();
+		void CycleRenderMode();
 
 	private:
 

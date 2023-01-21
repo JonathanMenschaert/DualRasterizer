@@ -78,10 +78,10 @@ int main(int argc, char* args[])
 					pRenderer->ToggleNormalMap(); //Turn normals on or off
 					break;
 				case SDL_SCANCODE_F7:
-					//pRenderer->ToggleNormalMap(); //Turn on depth buffer visualisation
+					pRenderer->CycleRenderMode(); //Turn on depth buffer visualisation
 					break;
 				case SDL_SCANCODE_F8:
-					//pRenderer->ToggleNormalMap(); //Turn on boundingbox visualisation
+					pRenderer->ToggleBoundingBoxes();//Turn on boundingbox visualisation
 					break;
 				case SDL_SCANCODE_F9:
 					pRenderer->CycleCullMode();

@@ -63,5 +63,14 @@ namespace dae
 
 		COUNT
 	};
+
+	enum class RenderMode
+	{
+		FinalColor,
+		DepthBuffer,
+
+		//Declare modes above
+		COUNT
+	};
 }
 

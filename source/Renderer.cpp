@@ -145,6 +145,16 @@ namespace dae {
 		m_pProcessorGPU->ToggleBackgroundColor(m_IsBackgroundUniform);
 	}
 
+	void Renderer::ToggleBoundingBoxes()
+	{
+		m_pProcessorCPU->ToggleBoundingBoxes();
+	}
+
+	void Renderer::CycleRenderMode()
+	{
+		m_pProcessorCPU->CycleRenderMode();
+	}
+
 	void Renderer::InitMeshes(ID3D11Device* pDevice)
 	{
 		std::vector<Vertex> vertices{};

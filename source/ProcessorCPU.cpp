@@ -61,6 +61,18 @@ namespace dae
 		m_ShouldRenderNormals = !m_ShouldRenderNormals;
 	}
 
+	void ProcessorCPU::ToggleBoundingBoxes()
+	{
+		m_ShouldRenderBoundingBoxes = !m_ShouldRenderBoundingBoxes;
+	}
+
+	void ProcessorCPU::CycleRenderMode()
+	{
+		int count{ static_cast<int>(RenderMode::COUNT) };
+		int currentMode{ static_cast<int>(m_RenderMode) };
+		m_RenderMode = static_cast<RenderMode>((currentMode + 1) % count);
+	}
+
 	void ProcessorCPU::CycleShadingMode()
 	{
 		int count{ static_cast<int>(ShadingMode::COUNT) };
@@ -186,6 +198,15 @@ namespace dae
 		{
 			for (int py{ static_cast<int>(boundingBoxMin.y) }; py < boundingBoxMax.y; ++py)
 			{
+				if (m_ShouldRenderBoundingBoxes)
+				{
+					m_pBackBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBackBuffer->format,
+						static_cast<uint8_t>(255),
+						static_cast<uint8_t>(255),
+						static_cast<uint8_t>(255));
+					continue;
+				}
+
 				//Check if pixel is in triangle
 				const Vector2 pixelCoordinates{ static_cast<float>(px), static_cast<float>(py) };
 				float signedAreaV0V1, signedAreaV1V2, signedAreaV2V0;

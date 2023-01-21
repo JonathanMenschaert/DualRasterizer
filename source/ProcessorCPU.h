@@ -21,6 +21,8 @@ namespace dae
 		virtual void Render(std::vector<Mesh*>& meshes, const Camera* camera) override;
 		virtual void ToggleBackgroundColor(bool useUniformBg) override;
 		void ToggleNormalMap();
+		void ToggleBoundingBoxes();
+		void CycleRenderMode();
 		void CycleShadingMode();
 
 	private:
@@ -35,17 +37,9 @@ namespace dae
 		void VertexTransformationFunction(Mesh* pMesh, const Camera* camera) const;
 		bool IsValidForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const;
 
-		enum class RenderMode
-		{
-			FinalColor,
-			DepthBuffer,
-
-			//Declare modes above
-			COUNT
-		};
-
 		const ColorRGB m_SoftwareColor{ 0.39f, 0.39f, 0.39f };
 		bool m_ShouldRenderNormals{ true };
+		bool m_ShouldRenderBoundingBoxes{ false };
 		RenderMode m_RenderMode{ RenderMode::FinalColor };
 		ShadingMode m_ShadingMode{ ShadingMode::Combined };
 	};
