@@ -70,13 +70,14 @@ namespace dae {
 	void Renderer::Update(const Timer* pTimer)
 	{
 		m_Camera.Update(pTimer);
-		if (m_ShouldRotate)
+		
+		for (Mesh* pMesh : m_Meshes)
 		{
-			for (Mesh* pMesh : m_Meshes)
+			if (m_ShouldRotate)
 			{
 				pMesh->RotateY(pTimer->GetElapsed() * m_RotationSpeed);
-				pMesh->SetMatrices(m_Camera.viewMatrix * m_Camera.projectionMatrix, m_Camera.invViewMatrix);
 			}
+			pMesh->SetMatrices(m_Camera.viewMatrix * m_Camera.projectionMatrix, m_Camera.invViewMatrix);
 		}
 	}
 

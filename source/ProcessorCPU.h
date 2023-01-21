@@ -32,10 +32,10 @@ namespace dae
 		uint32_t* m_pBackBufferPixels{};
 		float* m_pDepthBufferPixels{};
 
-		void RenderMesh(std::vector<Mesh*>& meshes, const Camera* camera);
-		void RenderMeshTriangle(Mesh* pMesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices = false);
+		void ProjectMesh(std::vector<Mesh*>& meshes, const Camera* camera);
+		void RasterizeTriangle(Mesh* pMesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices = false);
 		void VertexTransformationFunction(Mesh* pMesh, const Camera* camera) const;
-		bool IsValidForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const;
+		bool IsValidPixelForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const;
 
 		const ColorRGB m_SoftwareColor{ 0.39f, 0.39f, 0.39f };
 		bool m_ShouldRenderNormals{ true };

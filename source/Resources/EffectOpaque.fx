@@ -38,9 +38,9 @@ BlendState gBlendState
 
 DepthStencilState gDepthStencilState
 {
-    DepthEnable = true;
     DepthWriteMask = 1;
     DepthFunc = less;
+    DepthEnable = true;
     StencilEnable = false;
 };
 
@@ -102,7 +102,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
 	float4x4 tangentSpaceAxis = float4x4(float4(input.Tangent, 0.f), float4(normalize(binormal), 0.f), float4(input.Normal, 0.f), float4(0.f, 0.f, 0.f, 1.f));
 	float3 sampledNormal = gNormalMap.Sample(gSampleState, input.UV).rgb;
 	sampledNormal = (2.f * sampledNormal) - float3(1.f, 1.f, 1.f);
-	sampledNormal = normalize(mul(float4(sampledNormal, 0.f), tangentSpaceAxis));
+	sampledNormal = normalize(mul(float4(sampledNormal, 0.f), tangentSpaceAxis));	
 
 	float observedArea = saturate(dot(sampledNormal, -gLightDirection));
 	float4 lambert = CalculateDiffuse(1.f, gDiffuseMap.Sample(gSampleState, input.UV));
@@ -111,7 +111,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
 	float phongExp = gShininess * gGlossinessMap.Sample(gSampleState, input.UV).r;
 	float4 phong = CalculateSpecular(gSpecularMap.Sample(gSampleState, input.UV), 1.f, phongExp, gLightDirection, -viewDirection, sampledNormal);
 
-	return (lambert + phong + gAmbientLight) * observedArea;
+	return lambert * observedArea + phong + gAmbientLight;
 }
 
 //---------------

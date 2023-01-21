@@ -210,7 +210,7 @@ namespace dae
 			const ColorRGB diffuse{ dae::BRDF::Lambert(m_Kd, m_pDiffuseTexture->Sample(out.uv)) * m_LightIntensity };
 			const ColorRGB specular{ BRDF::Phong(m_pSpecularTexture->Sample(out.uv), 1.f, m_pGlossinessTexture->Sample(out.uv).r * m_Shininess,
 				m_LightDirection, -out.viewDirection, sampledNormal) };
-			return (diffuse + specular + m_AmbientLight) * observedArea;
+			return diffuse * observedArea + specular + m_AmbientLight;
 		}
 		case ShadingMode::ObservedArea:
 		{
@@ -225,7 +225,7 @@ namespace dae
 		{
 			const ColorRGB specular{ BRDF::Phong(m_pSpecularTexture->Sample(out.uv), 1.f, m_pGlossinessTexture->Sample(out.uv).r * m_Shininess,
 				m_LightDirection, -out.viewDirection, sampledNormal) };
-			return specular * observedAreaColor;
+			return specular;
 		}
 		default:
 			return ColorRGB{};

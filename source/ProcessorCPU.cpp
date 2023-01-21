@@ -43,7 +43,7 @@ namespace dae
 		std::fill_n(m_pDepthBufferPixels, nrPixels, 1.f);
 		SDL_LockSurface(m_pBackBuffer);
 
-		RenderMesh(meshes, camera);
+		ProjectMesh(meshes, camera);
 
 		//Update SDL Surface
 		SDL_UnlockSurface(m_pBackBuffer);
@@ -102,7 +102,7 @@ namespace dae
 		}
 	}
 
-	inline bool ProcessorCPU::IsValidForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const
+	inline bool ProcessorCPU::IsValidPixelForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const
 	{
 		//calculate if all areas are possible
 		const bool isAreaV0V1Pos{ areaV0V1 >= 0.f };
@@ -120,7 +120,7 @@ namespace dae
 		return isCullModeNoneValid || isCullModeFrontValid || isCullModeBackValid;
 	}
 
-	void ProcessorCPU::RenderMesh(std::vector<Mesh*>& meshes, const Camera* camera)
+	void ProcessorCPU::ProjectMesh(std::vector<Mesh*>& meshes, const Camera* camera)
 	{
 		for (Mesh* pMesh : meshes)
 		{
@@ -146,7 +146,7 @@ namespace dae
 				const uint32_t numIndices{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2)};
 				concurrency::parallel_for(0u, numIndices, [=, this](uint32_t vertIdx)
 					{
-						RenderMeshTriangle(pMesh, screenVertices, vertIdx, vertIdx & 1);
+						RasterizeTriangle(pMesh, screenVertices, vertIdx, vertIdx & 1);
 					}
 				);
 				break;
@@ -155,7 +155,7 @@ namespace dae
 				const uint32_t numTriangles{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2) / 3 };
 				concurrency::parallel_for(0u, numTriangles, [=, this](uint32_t vertIdx)
 					{
-						RenderMeshTriangle(pMesh, screenVertices, vertIdx * 3);
+						RasterizeTriangle(pMesh, screenVertices, vertIdx * 3);
 					}
 				);
 				break;
@@ -163,7 +163,7 @@ namespace dae
 		}
 	}
 
-	void ProcessorCPU::RenderMeshTriangle(Mesh* pMesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices)
+	void ProcessorCPU::RasterizeTriangle(Mesh* pMesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices)
 	{
 		//Get vertex from the index vector.
 		//The vertices will be swapped when vertIdx is uneven and the TriangleStrip primitive topology is set
@@ -215,7 +215,7 @@ namespace dae
 					screenVertices[vertIdx2], pixelCoordinates, signedAreaV0V1, signedAreaV1V2, signedAreaV2V0))
 				{
 					
-					if (!IsValidForCullMode(meshCullMode, signedAreaV0V1, signedAreaV1V2, signedAreaV2V0)) continue;
+					if (!IsValidPixelForCullMode(meshCullMode, signedAreaV0V1, signedAreaV1V2, signedAreaV2V0)) continue;
 					
 
 					//Calculate interpolated depth

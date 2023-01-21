@@ -209,7 +209,7 @@ namespace dae
 		m_CullMode = static_cast<CullMode>(state % count);
 
 		D3D11_RASTERIZER_DESC rastDesc{};
-		rastDesc.FrontCounterClockwise = false;
+		
 		rastDesc.FillMode = D3D11_FILL_SOLID;
 		rastDesc.DepthBias = 0;
 		rastDesc.SlopeScaledDepthBias = 0.f;
