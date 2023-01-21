@@ -6,6 +6,7 @@ float gPi = 3.14159265359f;
 float gLightIntensity = 7.f;
 float gShininess = 25.f;
 float3 gLightDirection = float3(0.577f, -0.577f, 0.577f);
+float4 gAmbientLight = float4(0.025f, 0.025f, 0.025f, 1.f );
 
 float4x4 gWorldViewProj : WorldViewProjection;
 float4x4 gWorld : WorldMatrix;
@@ -98,20 +99,19 @@ float4 CalculateSpecular(float4 specularColor, float ks, float exp, float3 light
 float4 PS(VS_OUTPUT input) : SV_TARGET
 {
 	float3 binormal = cross(input.Normal, input.Tangent);
-	float4x4 tangentSpaceAxis = float4x4(float4(input.Tangent, 0.f), float4(normalize(binormal), 0.f), float4(input.Normal, 0.f), float4(0.f, 0.f, 0.f, 0.f));
+	float4x4 tangentSpaceAxis = float4x4(float4(input.Tangent, 0.f), float4(normalize(binormal), 0.f), float4(input.Normal, 0.f), float4(0.f, 0.f, 0.f, 1.f));
 	float3 sampledNormal = gNormalMap.Sample(gSampleState, input.UV).rgb;
-	sampledNormal = 2.f * sampledNormal - float3(1.f, 1.f, 1.f);
-	sampledNormal = mul(float4(sampledNormal, 0.f), tangentSpaceAxis);
-	normalize(sampledNormal);
+	sampledNormal = (2.f * sampledNormal) - float3(1.f, 1.f, 1.f);
+	sampledNormal = normalize(mul(float4(sampledNormal, 0.f), tangentSpaceAxis));
 
 	float observedArea = saturate(dot(sampledNormal, -gLightDirection));
 	float4 lambert = CalculateDiffuse(1.f, gDiffuseMap.Sample(gSampleState, input.UV));
 
 	float3 viewDirection = normalize(input.WorldPosition.xyz - gViewInverse[3].xyz);
 	float phongExp = gShininess * gGlossinessMap.Sample(gSampleState, input.UV).r;
-	float phong = CalculateSpecular(gSpecularMap.Sample(gSampleState, input.UV), 1.f, phongExp, gLightDirection, -viewDirection, sampledNormal);
+	float4 phong = CalculateSpecular(gSpecularMap.Sample(gSampleState, input.UV), 1.f, phongExp, gLightDirection, -viewDirection, sampledNormal);
 
-	return (lambert + phong) * observedArea;
+	return (lambert + phong + gAmbientLight) * observedArea;
 }
 
 //---------------

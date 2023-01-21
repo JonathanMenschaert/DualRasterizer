@@ -84,7 +84,7 @@ int main(int argc, char* args[])
 					pRenderer->ToggleBoundingBoxes();//Turn on boundingbox visualisation
 					break;
 				case SDL_SCANCODE_F9:
-					pRenderer->CycleCullMode();
+					pRenderer->CycleCullMode(); //Cycle through front, back or none culline
 					break;
 				case SDL_SCANCODE_F10:
 					pRenderer->ToggleUniformColor(); //Toggle uniform background color
