@@ -35,7 +35,7 @@ namespace dae
 	{
 		//Lock Backbuffer
 		SDL_FillRect(m_pBackBuffer, NULL, SDL_MapRGB(m_pBackBuffer->format, 
-			static_cast<Uint8>(m_BackgroundColor.r), 
+			static_cast<Uint8>(m_BackgroundColor.r),
 			static_cast<Uint8>(m_BackgroundColor.g),
 			static_cast<Uint8>(m_BackgroundColor.b)
 		));
@@ -141,24 +141,45 @@ namespace dae
 
 			switch (pMesh->GetPrimitiveTopology())
 			{
-			case PrimitiveTopology::TriangleStrip:
-			{
-				const uint32_t numIndices{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2)};
-				concurrency::parallel_for(0u, numIndices, [=, this](uint32_t vertIdx)
+				case PrimitiveTopology::TriangleStrip:
+				{
+					if (pMesh->UseMultiThreading())
 					{
-						RasterizeTriangle(pMesh, screenVertices, vertIdx, vertIdx & 1);
+						const uint32_t numIndices{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2) };
+						concurrency::parallel_for(0u, numIndices, [=, this](uint32_t vertIdx)
+						{
+							RasterizeTriangle(pMesh, screenVertices, vertIdx, vertIdx & 1);
+						});
 					}
-				);
-				break;
-			}
-			case PrimitiveTopology::TriangleList:
-				const uint32_t numTriangles{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2) / 3 };
-				concurrency::parallel_for(0u, numTriangles, [=, this](uint32_t vertIdx)
+					else
 					{
-						RasterizeTriangle(pMesh, screenVertices, vertIdx * 3);
+						for (uint32_t vertIdx{}; vertIdx < pMesh->GetIndices().size() - 2; ++vertIdx)
+						{
+							RasterizeTriangle(pMesh, screenVertices, vertIdx, vertIdx % 2);
+						}
 					}
-				);
-				break;
+					break;
+				}
+				case PrimitiveTopology::TriangleList:
+				{
+					if (pMesh->UseMultiThreading())
+					{
+						const uint32_t numTriangles{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2) / 3 };
+						concurrency::parallel_for(0u, numTriangles, [=, this](uint32_t vertIdx)
+						{
+								RasterizeTriangle(pMesh, screenVertices, vertIdx * 3);
+						});
+					}
+					else
+					{
+						for (uint32_t vertIdx{}; vertIdx < pMesh->GetIndices().size() - 2; vertIdx += 3)
+						{
+							RasterizeTriangle(pMesh, screenVertices, vertIdx);
+						}
+					}
+					break;
+				}
+			
 			}
 		}
 	}
@@ -228,16 +249,16 @@ namespace dae
 
 					const float depthInterpolated
 					{
-						1.f / (1.f / pMesh->GetVerticesOut()[vertIdx0].position.z * weightV0 +
-						1.f / pMesh->GetVerticesOut()[vertIdx1].position.z * weightV1 +
-						1.f / pMesh->GetVerticesOut()[vertIdx2].position.z * weightV2)
+						1.f / (weightV0 / pMesh->GetVerticesOut()[vertIdx0].position.z +
+						weightV1 / pMesh->GetVerticesOut()[vertIdx1].position.z +
+						weightV2 / pMesh->GetVerticesOut()[vertIdx2].position.z )
 					};
 
 					//Compare calculated depth to the depth already stored in the depthbuffer. 
 					//The depthtest is passed when the calculated depth is smaller.
 					const int pixelIdx{ px + py * m_Width };
 					if (m_pDepthBufferPixels[pixelIdx] <= depthInterpolated || depthInterpolated < 0.f || depthInterpolated > 1.f) continue;
-					m_pDepthBufferPixels[pixelIdx] = depthInterpolated;
+					if (pMesh->UseDepthBuffer()) m_pDepthBufferPixels[pixelIdx] = depthInterpolated;
 
 
 					ColorRGB finalColor{};
@@ -253,17 +274,20 @@ namespace dae
 
 						const float viewDepthInterpolated
 						{
-							1.f / (1.f * inv0PosW * weightV0 +
-							1.f * inv1PosW * weightV1 +
-							1.f * inv2PosW * weightV2)
+							1.f / (inv0PosW * weightV0 +
+							inv1PosW * weightV1 +
+							inv2PosW * weightV2)
 						};
 
-						const Vector2 pixelUV
+						Vector2 pixelUV
 						{
 							(pMesh->GetVerticesOut()[vertIdx0].uv * inv0PosW * weightV0 +
 							pMesh->GetVerticesOut()[vertIdx1].uv * inv1PosW * weightV1 +
 							pMesh->GetVerticesOut()[vertIdx2].uv * inv2PosW * weightV2) * viewDepthInterpolated
 						};
+						//Clamping uv to mitigate rounding errors from the calculations
+						pixelUV.x = std::min(1.f, std::max(pixelUV.x, 0.f));
+						pixelUV.y = std::min(1.f, std::max(pixelUV.y, 0.f));
 
 						const Vector3 normal
 						{
@@ -291,7 +315,8 @@ namespace dae
 						interpolatedVertex.normal = normal.Normalized();
 						interpolatedVertex.tangent = tangent.Normalized();
 						interpolatedVertex.viewDirection = viewDirection.Normalized();
-						finalColor = pMesh->ShadePixel(interpolatedVertex, m_ShadingMode, m_ShouldRenderNormals);
+
+						finalColor = pMesh->ShadePixel(interpolatedVertex, m_ShadingMode, m_pBackBufferPixels[px + (py * m_Width)], m_ShouldRenderNormals);
 					}
 					break;
 					case RenderMode::DepthBuffer:

@@ -147,20 +147,20 @@ namespace dae
 		vertexDesc[0].AlignedByteOffset = 0;
 		vertexDesc[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
-		vertexDesc[3].SemanticName = "TEXCOORD";
-		vertexDesc[3].Format = DXGI_FORMAT_R32G32_FLOAT;
-		vertexDesc[3].AlignedByteOffset = 12;
-		vertexDesc[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-
-		vertexDesc[1].SemanticName = "NORMAL";
-		vertexDesc[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-		vertexDesc[1].AlignedByteOffset = 20;
+		vertexDesc[1].SemanticName = "TEXCOORD";
+		vertexDesc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+		vertexDesc[1].AlignedByteOffset = 12;
 		vertexDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
-		vertexDesc[2].SemanticName = "TANGENT";
+		vertexDesc[2].SemanticName = "NORMAL";
 		vertexDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-		vertexDesc[2].AlignedByteOffset = 32;
+		vertexDesc[2].AlignedByteOffset = 20;
 		vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+		vertexDesc[3].SemanticName = "TANGENT";
+		vertexDesc[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+		vertexDesc[3].AlignedByteOffset = 32;
+		vertexDesc[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 		//Create Input Layout
 		D3DX11_PASS_DESC passDesc{};
@@ -187,7 +187,7 @@ namespace dae
 		return pInputLayout;
 	}
 
-	ColorRGB EffectOpaque::ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals)
+	ColorRGB EffectOpaque::ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals)
 	{
 		Vector3 sampledNormal{ out.normal };
 

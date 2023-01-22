@@ -23,10 +23,11 @@ namespace dae
 		void SetWorldMatrix(const Matrix& matrix);
 		void SetViewInverseMatrix(const Matrix& matrix);
 
-		virtual ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals) = 0;
+		virtual ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals) = 0;
 		virtual void CycleSamplerState(ID3D11Device* pDevice);
 		virtual void CycleCullMode(ID3D11Device* pDevice);
-
+		virtual bool UseDepthBuffer() const;
+		virtual bool UseMultiThreading() const;
 		CullMode GetCullMode() const;
 
 	protected:

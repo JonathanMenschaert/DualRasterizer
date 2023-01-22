@@ -25,7 +25,7 @@ namespace dae
 			const string& normalPath, const string& specularPath, const string& glossinessPath);
 
 		virtual ID3D11InputLayout* CreateInputLayout(ID3D11Device* pDevice) const override;
-		virtual ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals) override;
+		virtual ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals) override;
 
 	private:
 		ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVar{ nullptr };

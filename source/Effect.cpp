@@ -253,6 +253,16 @@ namespace dae
 		if (pRasterizerState) pRasterizerState->Release();
 	}
 
+	bool Effect::UseDepthBuffer() const
+	{
+		return true;
+	}
+
+	bool Effect::UseMultiThreading() const
+	{
+		return true;
+	}
+
 	CullMode Effect::GetCullMode() const
 	{
 		return m_CullMode;

@@ -29,6 +29,7 @@ namespace dae
 	{
 		//Release resources
 		if (m_pDiffuseMapVar) m_pDiffuseMapVar->Release();
+		if (m_pDiffuseTexture) delete m_pDiffuseTexture;
 	}
 
 	//Diffuse map should be set at effect initialisation
@@ -53,9 +54,6 @@ namespace dae
 
 		//Add textures to the effect
 		pEffect->SetDiffuseMap(pDiffuseTexture);
-
-		//Delete the textures as they are not necessary anymore
-		delete pDiffuseTexture;
 		
 		return pEffect;
 	}
@@ -108,13 +106,32 @@ namespace dae
 		return pInputLayout;
 	}
 
-	ColorRGB EffectTransparent::ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals)
+	ColorRGB EffectTransparent::ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals)
 	{
-		return ColorRGB();
+		const Vector4 alphaColor{ m_pDiffuseTexture->SampleTransparency(out.uv) };
+
+		const uint8_t red{ static_cast<uint8_t>(currentColor >> 16) };
+		const uint8_t green{ static_cast<uint8_t>(currentColor >> 8) };
+		const uint8_t blue{ static_cast<uint8_t>(currentColor) };
+
+		const ColorRGB color{ 
+			static_cast<float>(red) * m_ColorModifier, 
+			static_cast<float>(green) * m_ColorModifier,
+			static_cast<float>(blue) * m_ColorModifier };
+		const ColorRGB newColor{ alphaColor.x, alphaColor.y, alphaColor.z };
+		return newColor * alphaColor.w + color * (1 - alphaColor.w);
 	}
 	
 	void EffectTransparent::CycleCullMode(ID3D11Device* pDevice)
 	{
 		//Cullmode for transparency is not changed
+	}
+	bool EffectTransparent::UseDepthBuffer() const
+	{
+		return false;
+	}
+	bool EffectTransparent::UseMultiThreading() const
+	{
+		return false;
 	}
 }

@@ -153,8 +153,20 @@ namespace dae
 	{
 		return m_pEffect->GetCullMode();
 	}
-	ColorRGB Mesh::ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals)
+	ColorRGB Mesh::ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals)
 	{
-		return m_pEffect->ShadePixel(out, shadingMode, renderNormals);
+		return m_pEffect->ShadePixel(out, shadingMode, currentColor, renderNormals);
 	}
+
+	bool Mesh::UseDepthBuffer() const
+	{
+		return m_pEffect->UseDepthBuffer();
+	}
+
+	bool Mesh::UseMultiThreading() const
+	{
+		return m_pEffect->UseMultiThreading();
+	}
+
+	
 }

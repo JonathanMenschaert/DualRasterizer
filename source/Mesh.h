@@ -33,7 +33,9 @@ namespace dae
 		bool ShouldRender() const;
 
 		CullMode GetCullMode() const;
-		ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, bool renderNormals);
+		ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals);
+		bool UseDepthBuffer() const;
+		bool UseMultiThreading() const;
 
 	private:
 		Effect* m_pEffect{ nullptr };
