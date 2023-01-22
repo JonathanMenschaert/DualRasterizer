@@ -29,6 +29,7 @@ namespace dae
 		virtual bool UseDepthBuffer() const;
 		virtual bool UseMultiThreading() const;
 		CullMode GetCullMode() const;
+		SamplerState GetSamplerState() const;
 
 	protected:
 		ID3DX11Effect* m_pEffect{ nullptr };
@@ -43,6 +44,6 @@ namespace dae
 		
 
 		CullMode m_CullMode{CullMode::None};
-		SampleState m_SamplerState{ SampleState::Point};
+		SamplerState m_SamplerState{ SamplerState::Point};
 	};
 }

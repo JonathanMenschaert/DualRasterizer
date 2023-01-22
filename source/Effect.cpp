@@ -152,8 +152,8 @@ namespace dae
 	void Effect::CycleSamplerState(ID3D11Device* pDevice)
 	{
 		int state{ static_cast<int>(m_SamplerState) + 1 };
-		int count{ static_cast<int>(SampleState::COUNT) };
-		m_SamplerState = static_cast<SampleState>(state % count);
+		int count{ static_cast<int>(SamplerState::COUNT) };
+		m_SamplerState = static_cast<SamplerState>(state % count);
 
 		D3D11_SAMPLER_DESC sampleDesc{};
 		sampleDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -167,20 +167,16 @@ namespace dae
 
 		switch (m_SamplerState)
 		{
-		case SampleState::Point:
+		case SamplerState::Point:
 			sampleDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-			std::wcout << L"Sampler state: Point\n";
 			break;
-		case SampleState::Linear:
+		case SamplerState::Linear:
 			sampleDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-			std::wcout << L"Sampler state: Linear\n";
 			break;
-		case SampleState::Anisotropic:
+		case SamplerState::Anisotropic:
 			sampleDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-			std::wcout << L"Sampler state: Anisotropic\n";
 			break;
 		default:
-			std::wcout << L"Invalid Sampler state\n";
 			break;
 		}
 		ID3D11SamplerState* pSamplerState{ nullptr };
@@ -224,15 +220,12 @@ namespace dae
 		{
 		case CullMode::None:
 			rastDesc.CullMode = D3D11_CULL_NONE;
-			std::wcout << "Cullmode: None\n";
 			break;
 		case CullMode::Back:
 			rastDesc.CullMode = D3D11_CULL_BACK;
-			std::wcout << "Cullmode: back\n";
 			break;
 		case CullMode::Front:
 			rastDesc.CullMode = D3D11_CULL_FRONT;
-			std::wcout << "Cullmode: front\n";
 			break;
 		default:
 			break;
@@ -266,5 +259,9 @@ namespace dae
 	CullMode Effect::GetCullMode() const
 	{
 		return m_CullMode;
+	}
+	SamplerState Effect::GetSamplerState() const
+	{
+		return m_SamplerState;
 	}
 }

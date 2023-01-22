@@ -54,7 +54,7 @@ namespace dae
 		COUNT
 	};
 
-	enum class SampleState
+	enum class SamplerState
 	{
 		Point,
 		Linear,

@@ -59,11 +59,13 @@ namespace dae
 	void dae::ProcessorCPU::ToggleNormalMap()
 	{
 		m_ShouldRenderNormals = !m_ShouldRenderNormals;
+		std::wcout << "\033[35m" << "**(SOFTWARE) NormalMap " << (m_ShouldRenderNormals ? "ON" : "OFF") << "\033[0m" << "\n";
 	}
 
 	void ProcessorCPU::ToggleBoundingBoxes()
 	{
 		m_ShouldRenderBoundingBoxes = !m_ShouldRenderBoundingBoxes;
+		std::wcout << "\033[35m" << "**(SOFTWARE) BoundingBox Visualization " << (m_ShouldRenderBoundingBoxes ? "ON" : "OFF") << "\033[0m" << "\n";
 	}
 
 	void ProcessorCPU::CycleRenderMode()
@@ -71,6 +73,9 @@ namespace dae
 		int count{ static_cast<int>(RenderMode::COUNT) };
 		int currentMode{ static_cast<int>(m_RenderMode) };
 		m_RenderMode = static_cast<RenderMode>((currentMode + 1) % count);
+
+		std::wcout << "\033[35m" << "**(SOFTWARE) DepthBuffer Visualization " 
+			<< (m_RenderMode == RenderMode::FinalColor ? "ON" : "OFF") << "\033[0m" << "\n";
 	}
 
 	void ProcessorCPU::CycleShadingMode()
@@ -78,6 +83,24 @@ namespace dae
 		int count{ static_cast<int>(ShadingMode::COUNT) };
 		int currentMode{ static_cast<int>(m_ShadingMode) };
 		m_ShadingMode = static_cast<ShadingMode>((currentMode + 1) % count);
+
+		switch (m_ShadingMode)
+		{
+		case ShadingMode::Combined:
+			std::wcout << "\033[35m" << "**(SOFTWARE) Shading Mode = COMBINED" << "\033[0m" << "\n";
+			break;
+		case ShadingMode::ObservedArea:
+			std::wcout << "\033[35m" << "**(SOFTWARE) Shading Mode = OBSERVED_AREA" << "\033[0m" << "\n";
+			break;
+		case ShadingMode::Diffuse:
+			std::wcout << "\033[35m" << "**(SOFTWARE) Shading Mode = DIFFUSE" << "\033[0m" << "\n";
+			break;
+		case ShadingMode::Specular:
+			std::wcout << "\033[35m" << "**(SOFTWARE) Shading Mode = SPECULAR" << "\033[0m" << "\n";
+			break;
+		default:
+			break;
+		}
 	}
 
 

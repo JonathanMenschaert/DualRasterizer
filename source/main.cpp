@@ -91,6 +91,7 @@ int main(int argc, char* args[])
 					break;
 				case SDL_SCANCODE_F11:
 					showFps = !showFps; //Toggle printing of fps
+					std::wcout << "\033[33m" << "**(Shared) Print FPS " << (showFps ? "ON" : "OFF") << "\033[0m" << "\n";
 					break;
 				}
 				break;

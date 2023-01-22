@@ -135,6 +135,7 @@ namespace dae
 	void Mesh::ToggleRender()
 	{
 		m_ShouldRender = !m_ShouldRender;
+		std::wcout << "\033[33m" << "**(Shared) FireFX " << (m_ShouldRender ? "ON" : "OFF") << "\033[0m" << "\n";
 	}
 	void Mesh::CycleCullMode(ID3D11Device* pDevice)
 	{
@@ -153,6 +154,10 @@ namespace dae
 	CullMode Mesh::GetCullMode() const
 	{
 		return m_pEffect->GetCullMode();
+	}
+	SamplerState Mesh::GetSamplerState() const
+	{
+		return m_pEffect->GetSamplerState();
 	}
 	ColorRGB Mesh::ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals)
 	{

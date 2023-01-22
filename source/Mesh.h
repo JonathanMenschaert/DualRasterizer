@@ -33,6 +33,7 @@ namespace dae
 		bool ShouldRender() const;
 
 		CullMode GetCullMode() const;
+		SamplerState GetSamplerState() const;
 		ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals);
 		bool UseDepthBuffer() const;
 		bool UseMultiThreading() const;
