@@ -111,7 +111,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
 	float phongExp = gShininess * gGlossinessMap.Sample(gSampleState, input.UV).r;
 	float4 phong = CalculateSpecular(gSpecularMap.Sample(gSampleState, input.UV), 1.f, phongExp, gLightDirection, -viewDirection, sampledNormal);
 
-	return /*float4(viewDirection, 0.f);*/lambert * observedArea + phong + gAmbientLight;
+	return lambert * observedArea + phong + gAmbientLight;
 }
 
 //---------------

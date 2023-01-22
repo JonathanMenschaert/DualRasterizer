@@ -26,11 +26,13 @@ namespace dae
 			std::cout << "DirectX initialization failed!\n";
 		}
 
+		//Set background to non uniform color
 		m_BackgroundColor = m_HardwareColor;
 	}
 
 	ProcessorGPU::~ProcessorGPU()
 	{
+		//Release resources
 		if (m_pRenderTargetView) m_pRenderTargetView->Release();
 		if (m_pRenderTargetBuffer) m_pRenderTargetBuffer->Release();
 		if (m_pDepthStencilView) m_pDepthStencilView->Release();

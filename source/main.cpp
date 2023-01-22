@@ -109,7 +109,7 @@ int main(int argc, char* args[])
 		
 		pTimer->Update();
 		printTimer += pTimer->GetElapsed();
-		if (printTimer >= 1.f && showFps)
+		if (printTimer >= 1.f && showFps) //Only print the fps when it is enabled
 		{
 			printTimer = 0.f;
 			std::cout << "dFPS: " << pTimer->GetdFPS() << std::endl;

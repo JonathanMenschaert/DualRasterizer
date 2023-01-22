@@ -21,12 +21,7 @@ namespace dae
 	private:
 		
 		//DirectX
-		//Member functions
 		HRESULT InitializeDirectX();
-
-
-		//Member variables
-		bool m_IsInitialized{ false };
 
 		const ColorRGB m_HardwareColor{ 0.39f, 0.59f, 0.93f };
 
@@ -40,17 +35,9 @@ namespace dae
 		ID3D11Resource* m_pRenderTargetBuffer;
 		ID3D11RenderTargetView* m_pRenderTargetView;
 
-		enum class SampleState
-		{
-			POINT,
-			LINEAR,
-			ANISOTROPIC,
-			//Define samplestates above
 
-			COUNT
-		};
-
-		SampleState m_SamplerState{ SampleState::POINT };
+		//Member variables
+		bool m_IsInitialized{ false };
 	};
 }
 

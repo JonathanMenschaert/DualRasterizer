@@ -19,7 +19,7 @@ namespace dae {
 		m_AspectRatio = static_cast<float>(m_Width) / m_Height;
 		m_Camera.Initialize(45.f, { 0.f,0.f, 0.f }, m_AspectRatio);
 
-		//Create Device & DeviceContext
+		//Create Device & DeviceContext to initialize the meshes
 		D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_1;
 		uint32_t createDeviceFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
@@ -38,15 +38,18 @@ namespace dae {
 			std::wcout << "Device or DeviceContext initialization failed!\n";
 		}
 
+		//Initialize the two renderers, default GPU
 		m_pProcessorGPU = new ProcessorGPU(m_pDevice, m_pDeviceContext, pWindow);
 		m_pProcessorCPU = new ProcessorCPU(pWindow);
 		m_pRenderProcessor = m_pProcessorGPU;		
 
+		//Print application header
 		PrintHeader();
 	}
 
 	Renderer::~Renderer()
 	{
+		//Release and delete resources
 		for (Mesh* pMesh : m_Meshes)
 		{
 			delete pMesh;
@@ -74,10 +77,13 @@ namespace dae {
 		
 		for (Mesh* pMesh : m_Meshes)
 		{
+			//only rotate when enabled
 			if (m_ShouldRotate)
 			{
 				pMesh->RotateY(pTimer->GetElapsed() * m_RotationSpeed);
 			}
+
+			//Update matrices
 			pMesh->SetMatrices(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix(), m_Camera.GetInvViewMatrix());
 		}
 	}
@@ -91,6 +97,7 @@ namespace dae {
 
 	void Renderer::ToggleProcessor()
 	{
+		//Switch between the render processor
 		switch (m_ProcessorType)
 		{
 		case ProcessorType::CPU:
@@ -120,6 +127,7 @@ namespace dae {
 
 	void Renderer::CycleSamplerState()
 	{
+		//Only cycle the shading mode when the current processor is the gpu
 		if (m_ProcessorType != ProcessorType::GPU) return;
 		for (Mesh* pMesh : m_Meshes)
 		{
@@ -167,18 +175,21 @@ namespace dae {
 
 	void Renderer::ToggleNormalMap()
 	{
+		//Only cycle the shading mode when the current processor is the cpu
 		if (m_ProcessorType != ProcessorType::CPU) return;
 		m_pProcessorCPU->ToggleNormalMap();
 	}
 
 	void Renderer::CycleShadingMode()
 	{
+		//Only cycle the shading mode when the current processor is the cpu
 		if (m_ProcessorType != ProcessorType::CPU) return;
 		m_pProcessorCPU->CycleShadingMode();
 	}
 
 	void Renderer::ToggleUniformColor()
 	{
+		//Toggle the background color of both processors
 		m_IsBackgroundUniform = !m_IsBackgroundUniform;
 		m_pProcessorCPU->ToggleBackgroundColor(m_IsBackgroundUniform);
 		m_pProcessorGPU->ToggleBackgroundColor(m_IsBackgroundUniform);
@@ -199,13 +210,14 @@ namespace dae {
 
 	void Renderer::InitMeshes(ID3D11Device* pDevice)
 	{
+		//Initialize mesh variables
 		std::vector<Vertex> vertices{};
 		std::vector<uint32_t> indices{};
 
 		const Vector3 translation{ 0.f, 0.f, 50.f };
 		const Vector3 rotation{ 0.f, 0.f, 0.f };
 
-		//Vehicle
+		//Vehicle resources
 		Utils::ParseOBJ("Resources/vehicle.obj", vertices, indices);
 
 		std::wstring fxPath{ L"Resources/EffectOpaque.fx" };
@@ -218,7 +230,7 @@ namespace dae {
 
 		m_Meshes.push_back(new Mesh(pDevice, vertices, indices, pVehicleEffect, rotation, translation));
 
-		//Fire
+		//FireFX resources
 		Utils::ParseOBJ("Resources/fireFX.obj", vertices, indices);
 
 		fxPath = L"Resources/EffectTransparent.fx";
@@ -227,6 +239,8 @@ namespace dae {
 		EffectTransparent* pFireEffect{EffectTransparent::CreateEffect(pDevice, fxPath, diffusePath)};
 		m_Meshes.push_back(new Mesh(pDevice, vertices, indices, pFireEffect, rotation, translation));
 	}
+
+
 	void Renderer::PrintHeader() const
 	{
 		//Shared Keybindings

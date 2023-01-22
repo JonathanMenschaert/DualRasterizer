@@ -37,9 +37,9 @@ namespace dae
 
 	private:
 
-		void InitMeshes(ID3D11Device* pDevice);
 		void PrintHeader() const;
 
+		//Member variables
 		enum class ProcessorType
 		{
 			CPU,
@@ -67,6 +67,7 @@ namespace dae
 		//DirectX
 		ID3D11Device* m_pDevice;
 		ID3D11DeviceContext* m_pDeviceContext;
+		void InitMeshes(ID3D11Device* pDevice);
 
 		
 		//Processors
