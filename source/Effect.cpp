@@ -6,6 +6,7 @@ namespace dae
 	Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 		:m_pEffect{ LoadEffect(pDevice, assetFile) }
 	{
+		//Load in the base variables from the fx file
 		m_pTechnique = m_pEffect->GetTechniqueByName("DefaultTechnique");
 		if (!m_pTechnique->IsValid())
 		{
@@ -151,10 +152,13 @@ namespace dae
 	//SamplerState desc: https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_sampler_desc
 	void Effect::CycleSamplerState(ID3D11Device* pDevice)
 	{
+		//Cycle through the sampler state
 		int state{ static_cast<int>(m_SamplerState) + 1 };
 		int count{ static_cast<int>(SamplerState::COUNT) };
 		m_SamplerState = static_cast<SamplerState>(state % count);
 
+
+		//Set up the sampler descriptor
 		D3D11_SAMPLER_DESC sampleDesc{};
 		sampleDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 		sampleDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -165,6 +169,8 @@ namespace dae
 		sampleDesc.MaxLOD = D3D11_FLOAT32_MAX;
 		sampleDesc.MaxAnisotropy = 16;
 
+
+		//Set the filter type depending on the state
 		switch (m_SamplerState)
 		{
 		case SamplerState::Point:
@@ -179,33 +185,39 @@ namespace dae
 		default:
 			break;
 		}
+
+		//Attept to create a new sampler state
 		ID3D11SamplerState* pSamplerState{ nullptr };
 		HRESULT result{ pDevice->CreateSamplerState(&sampleDesc, &pSamplerState) };
 		if (FAILED(result))
 		{
+			//If failed, make sure the state is resource is released
 			if (pSamplerState) pSamplerState->Release();
 			std::wcout << L"Failed to create new Sampler State!\n";
 			return;
 		}
 
+		//Attempt to set the new sampler state
 		result = m_pSamplerEffect->SetSampler(0, pSamplerState);
-
 		if (FAILED(result))
 		{
 			std::wcout << L"Failed to update Sampler State\n";
 		}
+
+		//Release the state resource
 		if (pSamplerState) pSamplerState->Release();
 	}
 
 	//Rasterizer desc: https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_rasterizer_desc
 	void Effect::CycleCullMode(ID3D11Device* pDevice)
 	{
+		//Cycle through the cullmode
 		int state{ static_cast<int>(m_CullMode) + 1 };
 		int count{ static_cast<int>(CullMode::COUNT) };
 		m_CullMode = static_cast<CullMode>(state % count);
 
-		D3D11_RASTERIZER_DESC rastDesc{};
-		
+		//Prepare the rasterizer descriptor
+		D3D11_RASTERIZER_DESC rastDesc{};		
 		rastDesc.FillMode = D3D11_FILL_SOLID;
 		rastDesc.DepthBias = 0;
 		rastDesc.SlopeScaledDepthBias = 0.f;
@@ -215,7 +227,7 @@ namespace dae
 		rastDesc.MultisampleEnable = false;
 		rastDesc.AntialiasedLineEnable = false;
 		
-
+		//Set Cullmode based on the state
 		switch (m_CullMode)
 		{
 		case CullMode::None:
@@ -230,19 +242,26 @@ namespace dae
 		default:
 			break;
 		}
+
+		//Attempt to create a new rasterizer state
 		ID3D11RasterizerState* pRasterizerState{ nullptr };
 		HRESULT result{ pDevice->CreateRasterizerState(&rastDesc, &pRasterizerState) };
 		if (FAILED(result))
 		{
+			//If failed, make sure the state is resource is released
 			if (pRasterizerState) pRasterizerState->Release();
 			std::wcout << L"Failed to create new Rasterizer State!\n";
 			return;
 		}
+
+		//Attept to set the new rasterizer state
 		result = m_pRasterizerEffect->SetRasterizerState(0, pRasterizerState);
 		if (FAILED(result))
 		{
 			std::wcout << L"Failed to update Rasterizer State!\n";
 		}
+
+		//Release the state resource
 		if (pRasterizerState) pRasterizerState->Release();
 	}
 

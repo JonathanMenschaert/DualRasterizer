@@ -48,6 +48,7 @@ namespace dae
 			return;
 		}
 
+		//Transfer the indices and the vertices to appropriate variables
 		m_Indices = indices;
 		for (const Vertex& vertex : vertices)
 		{
@@ -64,6 +65,7 @@ namespace dae
 
 	Mesh::~Mesh()
 	{
+		//Release resources
 		if (m_pEffect) delete m_pEffect;
 		if (m_pIndexBuffer) m_pIndexBuffer->Release();		
 		if (m_pVertexBuffer) m_pVertexBuffer->Release();		
@@ -106,6 +108,7 @@ namespace dae
 
 	void Mesh::SetMatrices(const Matrix& viewProjMatrix, const Matrix& inverseViewMatrix)
 	{
+		//Set the different matrices
 		m_WorldMatrix = m_RotationMatrix * m_TranslationMatrix;
 		const Matrix worldMatrix{ m_WorldMatrix };
 		m_pEffect->SetViewProjectionMatrix(worldMatrix * viewProjMatrix);
@@ -161,6 +164,7 @@ namespace dae
 	}
 	ColorRGB Mesh::ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals)
 	{
+		//Transfer the necessary values to the effect
 		return m_pEffect->ShadePixel(out, shadingMode, currentColor, renderNormals);
 	}
 

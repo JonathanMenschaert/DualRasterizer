@@ -47,6 +47,7 @@ namespace dae
 			nearPlane = zn;
 			farPlane = zf;
 			origin = _origin;
+			CalculateProjectionMatrix();
 		}
 
 		const Matrix& GetViewMatrix() const
@@ -76,8 +77,6 @@ namespace dae
 			invViewMatrix = { right, up, forward, origin };
 
 			viewMatrix = Matrix::Inverse(invViewMatrix);
-			//ViewMatrix => Matrix::CreateLookAtLH(...) [not implemented yet]
-			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixlookatlh
 		}
 
 		void CalculateProjectionMatrix()
@@ -92,14 +91,14 @@ namespace dae
 			const float deltaTime = pTimer->GetElapsed();
 
 			//Camera Update Logic
-			const float linearSpeed{ 10.f };
-			const float rotationSpeed{ 500.f };
+			const float linearSpeed{ 20.f };
+			const float rotationSpeed{ 360.f * TO_RADIANS};
 
 			//Keyboard Input
 			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
 
 			const bool isShiftPressed{ pKeyboardState[SDL_SCANCODE_LSHIFT] || pKeyboardState[SDL_SCANCODE_RSHIFT] };
-			const float shiftModifier{ 4.f * isShiftPressed + 1.f * !isShiftPressed };
+			const float shiftModifier{ 3.f * isShiftPressed + 1.f};
 			const float speedModifier{ deltaTime * linearSpeed * shiftModifier };
 
 			const bool isForwardsPressed{ pKeyboardState[SDL_SCANCODE_W] || pKeyboardState[SDL_SCANCODE_UP] };
@@ -117,21 +116,23 @@ namespace dae
 			const float rotationModifier{ deltaTime * rotationSpeed * shiftModifier };
 
 			//Calculate rotation & movement on mouse movement
+			SDL_BUTTON_X2;
 			if (mouseY != 0.f || mouseX != 0.f)
 			{
 				//Invert mouse Y
 				mouseY *= -1;
 
-				origin += forward * rotationSpeed * speedModifier * (mouseState == SDL_BUTTON_LMASK) * static_cast<float>(mouseY);
-				origin += Vector3::UnitY * rotationSpeed * speedModifier * (mouseState == (SDL_BUTTON_RMASK | SDL_BUTTON_LMASK)) * static_cast<float>(mouseY);
-				totalPitch += static_cast<float>(mouseY) * TO_RADIANS * (mouseState == SDL_BUTTON_RMASK) * rotationModifier;
-				totalYaw += static_cast<float>(mouseX) * TO_RADIANS *
-					(mouseState & SDL_BUTTON_LMASK || mouseState & SDL_BUTTON_RMASK) * rotationModifier;
+				Vector3 forwardSpeed = forward * speedModifier * (mouseState == SDL_BUTTON_LMASK) * static_cast<float>(mouseY);
+				origin += forwardSpeed;
+				origin += Vector3::UnitY * speedModifier * (mouseState == (SDL_BUTTON_RMASK | SDL_BUTTON_LMASK)) * static_cast<float>(mouseY);
+				totalPitch += static_cast<float>(mouseY) * (mouseState == SDL_BUTTON_RMASK) * rotationModifier;
+				float difference = static_cast<float>(mouseX) * (mouseState & SDL_BUTTON_LMASK || mouseState & SDL_BUTTON_RMASK) * rotationModifier;
+				//std::cout << "Speed Pitch: " << difference << "\n";
+				totalYaw += difference;
 			}
 
 			//Update Matrices
 			CalculateViewMatrix();
-			CalculateProjectionMatrix(); //Try to optimize this - should only be called once or when fov/aspectRatio changes
 		}
 	};
 }

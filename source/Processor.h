@@ -27,6 +27,7 @@ namespace dae
 		int m_Height{};
 		ColorRGB m_BackgroundColor{};
 
+		//Static uniform backgroundcolor
 		static const ColorRGB m_UniformColor;
 	};
 }

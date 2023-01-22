@@ -27,6 +27,7 @@ namespace dae
 
 	ProcessorCPU::~ProcessorCPU()
 	{
+		//Free resources
 		delete[] m_pDepthBufferPixels;
 		m_pDepthBufferPixels = nullptr;
 	}
@@ -43,6 +44,7 @@ namespace dae
 		std::fill_n(m_pDepthBufferPixels, nrPixels, 1.f);
 		SDL_LockSurface(m_pBackBuffer);
 
+		//Projection Stage
 		ProjectMesh(meshes, camera);
 
 		//Update SDL Surface
@@ -70,6 +72,7 @@ namespace dae
 
 	void ProcessorCPU::CycleRenderMode()
 	{
+		//Cycle through the rendermodes
 		int count{ static_cast<int>(RenderMode::COUNT) };
 		int currentMode{ static_cast<int>(m_RenderMode) };
 		m_RenderMode = static_cast<RenderMode>((currentMode + 1) % count);
@@ -80,6 +83,7 @@ namespace dae
 
 	void ProcessorCPU::CycleShadingMode()
 	{
+		//Cycle through the shading modes
 		int count{ static_cast<int>(ShadingMode::COUNT) };
 		int currentMode{ static_cast<int>(m_ShadingMode) };
 		m_ShadingMode = static_cast<ShadingMode>((currentMode + 1) % count);
@@ -109,32 +113,43 @@ namespace dae
 		pMesh->GetVerticesOut().clear();
 		pMesh->GetVerticesOut().reserve(pMesh->GetVertices().size());
 		const Matrix worldViewProjectionMatrix{ pMesh->GetWorldMatrix() * camera->GetViewMatrix() * camera->GetProjectionMatrix()};
+		
 		for (const auto& vertexIn : pMesh->GetVertices())
 		{
 			VertexOut vertexOut{ Vector4{ vertexIn.position, 1.f}, vertexIn.uv, vertexIn.normal, 
 				vertexIn.tangent, vertexIn.viewDirection };
+
+			//Transform position based on worldviewproj matrix
 			vertexOut.position = worldViewProjectionMatrix.TransformPoint(vertexOut.position);
+
+			//Perspective Divide
 			const float perspectiveDiv{ 1.f / vertexOut.position.w };
 			vertexOut.position.x *= perspectiveDiv;
 			vertexOut.position.y *= perspectiveDiv;
 			vertexOut.position.z *= perspectiveDiv;
+
+			//Transform properties based on the mesh worldmatrix
 			vertexOut.normal = pMesh->GetWorldMatrix().TransformVector(vertexIn.normal);
 			vertexOut.tangent = pMesh->GetWorldMatrix().TransformVector(vertexIn.tangent);
 			vertexOut.viewDirection = (pMesh->GetWorldMatrix().TransformPoint(vertexIn.position) - camera->origin);
+
+			//Add the vertex to the output
 			pMesh->GetVerticesOut().emplace_back(vertexOut);
 		}
 	}
 
 	inline bool ProcessorCPU::IsValidPixelForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const
 	{
-		//calculate if all areas are possible
+		//Calculate sign of each area with true = >=0 and false = <0
 		const bool isAreaV0V1Pos{ areaV0V1 >= 0.f };
 		const bool isAreaV1V2Pos{ areaV1V2 >= 0.f };
 		const bool isAreaV2V0Pos{ areaV2V0 >= 0.f };
 
+		//Check if all area signs are either false or true
 		const bool isPointInFront{ isAreaV0V1Pos && isAreaV1V2Pos && isAreaV2V0Pos };
 		const bool isPointInBack{ !isAreaV0V1Pos && !isAreaV1V2Pos && !isAreaV2V0Pos };
 
+		//Check the cullmode
 		const bool isCullModeNoneValid{ (isPointInFront || isPointInBack)  && mode == CullMode::None };
 		const bool isCullModeFrontValid{ isPointInBack && mode == CullMode::Front};
 		const bool isCullModeBackValid{ isPointInFront && mode == CullMode::Back };
@@ -147,9 +162,13 @@ namespace dae
 	{
 		for (Mesh* pMesh : meshes)
 		{
+			//Used to not render the fireFX when turned off
 			if (!pMesh->ShouldRender()) continue;
-			//Check this later
+			
+			//Transform the mesh vertices
 			VertexTransformationFunction(pMesh, camera);
+
+			//Create the screen
 			std::vector<Vector2> screenVertices;
 			screenVertices.reserve(pMesh->GetVerticesOut().size());
 			for (const auto& vertexNdc : pMesh->GetVerticesOut())
@@ -162,13 +181,17 @@ namespace dae
 				);
 			}
 
+			//Check the mesh topology
 			switch (pMesh->GetPrimitiveTopology())
 			{
 				case PrimitiveTopology::TriangleStrip:
 				{
+					//Check if the mesh wants to use multithreading
+					//Cannot be used with transparent objects due to variable processing time
 					if (pMesh->UseMultiThreading())
 					{
 						const uint32_t numIndices{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2) };
+						//Go over the indices one by one for the strip topology
 						concurrency::parallel_for(0u, numIndices, [=, this](uint32_t vertIdx)
 						{
 							RasterizeTriangle(pMesh, screenVertices, vertIdx, vertIdx & 1);
@@ -176,6 +199,7 @@ namespace dae
 					}
 					else
 					{
+						//Go over the indices one by one for the strip topology
 						for (uint32_t vertIdx{}; vertIdx < pMesh->GetIndices().size() - 2; ++vertIdx)
 						{
 							RasterizeTriangle(pMesh, screenVertices, vertIdx, vertIdx % 2);
@@ -185,8 +209,11 @@ namespace dae
 				}
 				case PrimitiveTopology::TriangleList:
 				{
+					//Check if the mesh wants to use multithreading
+					//Cannot be used with transparent objects due to variable processing time
 					if (pMesh->UseMultiThreading())
 					{
+						//Go over the indices in steps of 3 for the list topology
 						const uint32_t numTriangles{ static_cast<uint32_t>(pMesh->GetIndices().size() - 2) / 3 };
 						concurrency::parallel_for(0u, numTriangles, [=, this](uint32_t vertIdx)
 						{
@@ -195,6 +222,7 @@ namespace dae
 					}
 					else
 					{
+						//Go over the indices in steps of 3 for the list topology
 						for (uint32_t vertIdx{}; vertIdx < pMesh->GetIndices().size() - 2; vertIdx += 3)
 						{
 							RasterizeTriangle(pMesh, screenVertices, vertIdx);
@@ -226,6 +254,7 @@ namespace dae
 			return;
 		}
 
+		//Cache cull mode
 		CullMode meshCullMode{ pMesh->GetCullMode() };
 
 		//Create boundingbox around triangle
@@ -242,6 +271,8 @@ namespace dae
 		{
 			for (int py{ static_cast<int>(boundingBoxMin.y) }; py < boundingBoxMax.y; ++py)
 			{
+				//Check if the bounding box should be rendered. 
+				//If so, skip the rest of code in the loop and continue to the next
 				if (m_ShouldRenderBoundingBoxes)
 				{
 					m_pBackBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBackBuffer->format,
@@ -258,7 +289,7 @@ namespace dae
 				if (GeometryUtils::IsPointInTriangle(screenVertices[vertIdx0], screenVertices[vertIdx1],
 					screenVertices[vertIdx2], pixelCoordinates, signedAreaV0V1, signedAreaV1V2, signedAreaV2V0))
 				{
-					
+					//Check if the pixel can be rendered in the current cullmode
 					if (!IsValidPixelForCullMode(meshCullMode, signedAreaV0V1, signedAreaV1V2, signedAreaV2V0)) continue;
 					
 
@@ -270,6 +301,7 @@ namespace dae
 					const float weightV1{ signedAreaV2V0 * triangleArea };
 					const float weightV2{ signedAreaV0V1 * triangleArea };
 
+					//Calculate z depth interpolated
 					const float depthInterpolated
 					{
 						1.f / (weightV0 / pMesh->GetVerticesOut()[vertIdx0].position.z +
@@ -285,12 +317,14 @@ namespace dae
 
 
 					ColorRGB finalColor{};
+
+					//Calculate final color based on the rendermode
 					switch (m_RenderMode)
 					{
 					default:
 					case RenderMode::FinalColor:
 					{
-
+						//Calculate w depth interpolated
 						const float inv0PosW{ 1.f / pMesh->GetVerticesOut()[vertIdx0].position.w };
 						const float inv1PosW{ 1.f / pMesh->GetVerticesOut()[vertIdx1].position.w };
 						const float inv2PosW{ 1.f / pMesh->GetVerticesOut()[vertIdx2].position.w };
@@ -312,6 +346,7 @@ namespace dae
 						pixelUV.x = std::min(1.f, std::max(pixelUV.x, 0.f));
 						pixelUV.y = std::min(1.f, std::max(pixelUV.y, 0.f));
 
+						//interpolate the various properties of the vertex
 						const Vector3 normal
 						{
 							(pMesh->GetVerticesOut()[vertIdx0].normal * inv0PosW * weightV0 +
@@ -339,16 +374,18 @@ namespace dae
 						interpolatedVertex.tangent = tangent.Normalized();
 						interpolatedVertex.viewDirection = viewDirection.Normalized();
 
+						//Pixelshading stage is done in the effect stored in the mesh
 						finalColor = pMesh->ShadePixel(interpolatedVertex, m_ShadingMode, m_pBackBufferPixels[px + (py * m_Width)], m_ShouldRenderNormals);
 					}
 					break;
 					case RenderMode::DepthBuffer:
 					{
-						pMesh->UseDepthBuffer();
+						//Calculate the depthColor
 						const float depthRemapped{ DepthRemap(depthInterpolated, 0.997f, 1.f) };
 						const ColorRGB depthViewColor{ depthRemapped, depthRemapped, depthRemapped };
 						const bool useDepthColor{ pMesh->UseDepthBuffer() };
 
+						//Retrieve the background color
 						uint8_t red{}, green{}, blue{};
 						SDL_GetRGB(m_pBackBufferPixels[px + (py * m_Width)], m_pBackBuffer->format, &red, &green, &blue);
 						const ColorRGB currentColor{ 
@@ -357,6 +394,7 @@ namespace dae
 							static_cast<float>(blue) * m_ColorModifier,
 						};
 
+						//Check if the depthcolor should be used instead of the background color
 						finalColor = useDepthColor * depthViewColor  + !useDepthColor * currentColor;
 					}
 					}

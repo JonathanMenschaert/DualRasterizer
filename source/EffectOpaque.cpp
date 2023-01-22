@@ -187,10 +187,12 @@ namespace dae
 		return pInputLayout;
 	}
 
+	//Pixel shading stage
 	ColorRGB EffectOpaque::ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals)
 	{
 		Vector3 sampledNormal{ out.normal };
 
+		//Render normals if enabled
 		if (renderNormals)
 		{
 			const Vector3 binormal{ Vector3::Cross(out.normal, out.tangent) };
@@ -201,34 +203,47 @@ namespace dae
 			sampledNormal.Normalize();
 		}
 
-		const float observedArea{ std::max(Vector3::Dot(sampledNormal, -m_LightDirection), 0.f) };
-		const ColorRGB observedAreaColor{ observedArea, observedArea, observedArea };
-
+		//Calculate shader based on the mode
 		switch (shadingMode)
 		{
 		case ShadingMode::Combined:
 		{
+			//Lambert BRDF
 			const ColorRGB diffuse{ dae::BRDF::Lambert(m_Kd, m_pDiffuseTexture->Sample(out.uv)) * m_LightIntensity };
+			
+			//Phong BRDF
 			const ColorRGB specular{ BRDF::Phong(m_pSpecularTexture->Sample(out.uv), 1.f, m_pGlossinessTexture->Sample(out.uv).r * m_Shininess,
 				m_LightDirection, -out.viewDirection, sampledNormal) };
+
+			const float observedArea{ std::max(Vector3::Dot(sampledNormal, -m_LightDirection), 0.f) };
+
 			return diffuse * observedArea + specular + m_AmbientLight;
 		}
 		case ShadingMode::ObservedArea:
 		{
+			const float observedArea{ std::max(Vector3::Dot(sampledNormal, -m_LightDirection), 0.f) };
+			const ColorRGB observedAreaColor{ observedArea, observedArea, observedArea };
 			return observedAreaColor;
 		}
 		case ShadingMode::Diffuse:
 		{
+			const float observedArea{ std::max(Vector3::Dot(sampledNormal, -m_LightDirection), 0.f) };
+			const ColorRGB observedAreaColor{ observedArea, observedArea, observedArea };
+
+			//Lambert BRDF
 			const ColorRGB diffuse{ BRDF::Lambert(m_Kd, m_pDiffuseTexture->Sample(out.uv) * m_LightIntensity) };
+
 			return diffuse * observedAreaColor;
 		}
 		case ShadingMode::Specular:
 		{
+			//Phong BRDF
 			const ColorRGB specular{ BRDF::Phong(m_pSpecularTexture->Sample(out.uv), 1.f, m_pGlossinessTexture->Sample(out.uv).r * m_Shininess,
 				m_LightDirection, -out.viewDirection, sampledNormal) };
 			return specular;
 		}
 		default:
+			//Return empty color by default
 			return ColorRGB{};
 		}
 	}

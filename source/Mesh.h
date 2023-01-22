@@ -39,19 +39,22 @@ namespace dae
 		bool UseMultiThreading() const;
 
 	private:
+		//DirectX variables
 		Effect* m_pEffect{ nullptr };
 		ID3D11Buffer* m_pVertexBuffer{ nullptr };
 		ID3D11Buffer* m_pIndexBuffer{ nullptr };
 		ID3D11InputLayout* m_pInputLayout{ nullptr };
 
-		uint32_t m_NumIndices{};
-		
+		//Matricces
 		Matrix m_TranslationMatrix{};
 		Matrix m_RotationMatrix{};
 		Matrix m_WorldMatrix;
 
+		//Topology
 		PrimitiveTopology m_Topology{ PrimitiveTopology::TriangleList };
 
+		//Data variables
+		uint32_t m_NumIndices{};
 		std::vector<VertexExt> m_Vertices{};
 		std::vector<VertexOut> m_VerticesOut{};
 		std::vector<uint32_t> m_Indices{};

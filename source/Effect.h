@@ -23,6 +23,8 @@ namespace dae
 		void SetWorldMatrix(const Matrix& matrix);
 		void SetViewInverseMatrix(const Matrix& matrix);
 
+		//Shade pixel made virtual so each effect can shade the pixel based on it's properties
+		//Also the Pixel Shading stage
 		virtual ColorRGB ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals) = 0;
 		virtual void CycleSamplerState(ID3D11Device* pDevice);
 		virtual void CycleCullMode(ID3D11Device* pDevice);
@@ -32,6 +34,8 @@ namespace dae
 		SamplerState GetSamplerState() const;
 
 	protected:
+
+		//DirectX variables
 		ID3DX11Effect* m_pEffect{ nullptr };
 		ID3DX11EffectTechnique* m_pTechnique{ nullptr };
 		ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVar{ nullptr };
@@ -42,7 +46,7 @@ namespace dae
 		ID3DX11EffectSamplerVariable* m_pSamplerEffect;
 		ID3DX11EffectRasterizerVariable* m_pRasterizerEffect;
 		
-
+		//Enum variables
 		CullMode m_CullMode{CullMode::None};
 		SamplerState m_SamplerState{ SamplerState::Point};
 	};

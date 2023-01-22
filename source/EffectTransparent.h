@@ -27,10 +27,13 @@ namespace dae
 		virtual bool UseMultiThreading() const override;
 
 	private:
+		//DirectX
 		ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVar{ nullptr };
 
+		//Textures
 		Texture* m_pDiffuseTexture{ nullptr };
 
+		//Color Calculation
 		const float m_ColorModifier{ 1.f / 255.f };
 	};
 }

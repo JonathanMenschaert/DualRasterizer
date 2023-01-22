@@ -123,7 +123,6 @@ namespace dae
 		uint8_t r{}, g{}, b{};
 		uint32_t pixel{ m_pSurfacePixels[u + v * m_pSurface->w] };
 		SDL_GetRGB(pixel, m_pSurface->format, &r, &g, &b);
-		//SDL_GetRGB()
 
 		return Vector3{
 			static_cast<float>(r) * m_ColorModifier,

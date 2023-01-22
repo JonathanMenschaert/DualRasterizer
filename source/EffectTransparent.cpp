@@ -106,22 +106,29 @@ namespace dae
 		return pInputLayout;
 	}
 
+	//Pixel Shading stage
 	ColorRGB EffectTransparent::ShadePixel(const VertexOut& out, ShadingMode shadingMode, const uint32_t currentColor, bool renderNormals)
 	{
-		const Vector4 alphaColor{ m_pDiffuseTexture->SampleTransparency(out.uv) };
+		//Sample color from diffuse map
+		const Vector4 sampleColor{ m_pDiffuseTexture->SampleTransparency(out.uv) };
 
+		//extract the colors by bitshifting
 		const uint8_t red{ static_cast<uint8_t>(currentColor >> 16) };
 		const uint8_t green{ static_cast<uint8_t>(currentColor >> 8) };
 		const uint8_t blue{ static_cast<uint8_t>(currentColor) };
 
+		//remap color values between [0, 1]
 		const ColorRGB oldColor{ 
 			static_cast<float>(red) * m_ColorModifier, 
 			static_cast<float>(green) * m_ColorModifier,
 			static_cast<float>(blue) * m_ColorModifier 
 		};
 
-		const ColorRGB newColor{ alphaColor.x, alphaColor.y, alphaColor.z };
-		return newColor * alphaColor.w + oldColor * (1 - alphaColor.w);
+		//Extract the color from the sampled Color
+		const ColorRGB newColor{ sampleColor.x, sampleColor.y, sampleColor.z };
+
+		//Calculate the partial coverage
+		return newColor * sampleColor.w + oldColor * (1 - sampleColor.w);
 	}
 	
 	void EffectTransparent::CycleCullMode(ID3D11Device* pDevice)

@@ -17,7 +17,6 @@ namespace dae
 		ProcessorCPU& operator=(const ProcessorCPU& processor) = delete;
 		ProcessorCPU& operator=(ProcessorCPU&& processor) noexcept = delete;
 
-
 		virtual void Render(std::vector<Mesh*>& meshes, const Camera* camera) override;
 		virtual void ToggleBackgroundColor(bool useUniformBg) override;
 		void ToggleNormalMap();
@@ -27,16 +26,21 @@ namespace dae
 
 	private:
 
+		//SDL
 		SDL_Surface* m_pFrontBuffer{ nullptr };
 		SDL_Surface* m_pBackBuffer{ nullptr };
 		uint32_t* m_pBackBufferPixels{};
 		float* m_pDepthBufferPixels{};
 
+		//Projection Stage
 		void ProjectMesh(std::vector<Mesh*>& meshes, const Camera* camera);
-		void RasterizeTriangle(Mesh* pMesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices = false);
 		void VertexTransformationFunction(Mesh* pMesh, const Camera* camera) const;
+
+		//Rasterization Stage
+		void RasterizeTriangle(Mesh* pMesh, const std::vector<Vector2>& screenVertices, uint32_t vertIdx, bool swapVertices = false);
 		bool IsValidPixelForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const;
 
+		//Variables
 		const ColorRGB m_SoftwareColor{ 0.39f, 0.39f, 0.39f };
 		const float m_ColorModifier{ 1.f / 255.f };
 		bool m_ShouldRenderNormals{ true };

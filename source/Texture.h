@@ -21,11 +21,15 @@ namespace dae
 		static Texture* LoadFromFile(ID3D11Device* pDevice, const std::string& path);
 
 	private:
+		//DirectX
 		ID3D11Texture2D* m_pResource{ nullptr };
 		ID3D11ShaderResourceView* m_pSRV{ nullptr };
 
+		//SDL
 		SDL_Surface* m_pSurface{ nullptr };
 		uint32_t* m_pSurfacePixels{ nullptr };
+
+		//Color Calculation
 		const float m_ColorModifier{ 1.f / 255.f };
 	};
 }
