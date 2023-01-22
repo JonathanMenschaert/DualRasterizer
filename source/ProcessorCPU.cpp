@@ -20,7 +20,7 @@ namespace dae
 
 		const int nrPixels{ m_Width * m_Height };
 		m_pDepthBufferPixels = new float[nrPixels];
-		std::fill_n(m_pDepthBufferPixels, nrPixels, FLT_MAX);
+		std::fill_n(m_pDepthBufferPixels, nrPixels, 1.f);
 
 		m_BackgroundColor = m_SoftwareColor * 255.f; //Multiply color to fit the FillRect function
 	}
@@ -344,8 +344,20 @@ namespace dae
 					break;
 					case RenderMode::DepthBuffer:
 					{
+						pMesh->UseDepthBuffer();
 						const float depthRemapped{ DepthRemap(depthInterpolated, 0.997f, 1.f) };
-						finalColor = ColorRGB{ depthRemapped, depthRemapped, depthRemapped };
+						const ColorRGB depthViewColor{ depthRemapped, depthRemapped, depthRemapped };
+						const bool useDepthColor{ pMesh->UseDepthBuffer() };
+
+						uint8_t red{}, green{}, blue{};
+						SDL_GetRGB(m_pBackBufferPixels[px + (py * m_Width)], m_pBackBuffer->format, &red, &green, &blue);
+						const ColorRGB currentColor{ 
+							static_cast<float>(red) * m_ColorModifier, 
+							static_cast<float>(green) * m_ColorModifier,
+							static_cast<float>(blue) * m_ColorModifier,
+						};
+
+						finalColor = useDepthColor * depthViewColor  + !useDepthColor * currentColor;
 					}
 					}
 

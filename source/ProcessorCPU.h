@@ -38,6 +38,7 @@ namespace dae
 		bool IsValidPixelForCullMode(CullMode mode, float areaV0V1, float areaV1V2, float areaV2V0) const;
 
 		const ColorRGB m_SoftwareColor{ 0.39f, 0.39f, 0.39f };
+		const float m_ColorModifier{ 1.f / 255.f };
 		bool m_ShouldRenderNormals{ true };
 		bool m_ShouldRenderBoundingBoxes{ false };
 		RenderMode m_RenderMode{ RenderMode::FinalColor };
