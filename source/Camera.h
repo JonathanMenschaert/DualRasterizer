@@ -39,6 +39,9 @@ namespace dae
 		float farPlane{ 100.f };
 		float aspectRatio{};
 
+		const float maxPitch{ 89.99f * TO_RADIANS };
+		const float maxYaw{ 360.f * TO_RADIANS };
+
 		void Initialize(float _fovAngle = 90.f, Vector3 _origin = { 0.f,0.f,0.f }, float ar = 1.7f, float zn = 0.1f, float zf = 100.f)
 		{
 			fovAngle = _fovAngle;
@@ -71,7 +74,8 @@ namespace dae
 			//ONB => invViewMatrix
 			//Inverse(ONB) => ViewMatrix
 			const Matrix finalRotation = Matrix::CreateRotation({ totalPitch, totalYaw, 0.f });
-			forward = finalRotation.TransformVector(Vector3::UnitZ).Normalized();
+			forward = finalRotation.TransformVector(Vector3::UnitZ);
+			forward.Normalize();
 			right = Vector3::Cross(Vector3::UnitY, forward).Normalized();
 			up = Vector3::Cross(forward, right).Normalized();
 			invViewMatrix = { right, up, forward, origin };
@@ -88,11 +92,12 @@ namespace dae
 
 		void Update(const Timer* pTimer)
 		{
-			const float deltaTime = pTimer->GetElapsed();
+			const float deltaTime{ pTimer->GetElapsed() };
 
 			//Camera Update Logic
-			const float linearSpeed{ 20.f };
-			const float rotationSpeed{ 360.f * TO_RADIANS};
+			const float linearSpeed{ 30.f };
+			const float rotationSpeed {150.f * TO_RADIANS};
+			const float mouseSensivity{ 1.5f};
 
 			//Keyboard Input
 			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
@@ -105,6 +110,8 @@ namespace dae
 			const bool isBackwardsPressed{ pKeyboardState[SDL_SCANCODE_S] || pKeyboardState[SDL_SCANCODE_DOWN] };
 			const bool isRightPressed{ pKeyboardState[SDL_SCANCODE_D] || pKeyboardState[SDL_SCANCODE_RIGHT] };
 			const bool isLeftPressed{ pKeyboardState[SDL_SCANCODE_A] || pKeyboardState[SDL_SCANCODE_LEFT] };
+
+			//Calculate camera origin position
 			origin += forward * speedModifier * isForwardsPressed;
 			origin += forward * -speedModifier * isBackwardsPressed;
 			origin += right * speedModifier * isRightPressed;
@@ -113,23 +120,27 @@ namespace dae
 			//Mouse Input
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
-			const float rotationModifier{ deltaTime * rotationSpeed * shiftModifier };
+			const float rotationModifier{rotationSpeed * shiftModifier * deltaTime};
 
-			//Calculate rotation & movement on mouse movement
-			SDL_BUTTON_X2;
-			if (mouseY != 0.f || mouseX != 0.f)
+			switch (mouseState)
 			{
-				//Invert mouse Y
-				mouseY *= -1;
-
-				Vector3 forwardSpeed = forward * speedModifier * (mouseState == SDL_BUTTON_LMASK) * static_cast<float>(mouseY);
-				origin += forwardSpeed;
-				origin += Vector3::UnitY * speedModifier * (mouseState == (SDL_BUTTON_RMASK | SDL_BUTTON_LMASK)) * static_cast<float>(mouseY);
-				totalPitch += static_cast<float>(mouseY) * (mouseState == SDL_BUTTON_RMASK) * rotationModifier;
-				float difference = static_cast<float>(mouseX) * (mouseState & SDL_BUTTON_LMASK || mouseState & SDL_BUTTON_RMASK) * rotationModifier;
-				//std::cout << "Speed Pitch: " << difference << "\n";
-				totalYaw += difference;
+			case SDL_BUTTON_X2:
+				origin -= Vector3::UnitY * static_cast<float>(mouseY) * mouseSensivity;
+				break;
+			case SDL_BUTTON_LMASK:
+				origin -= forward * static_cast<float>(mouseY) * mouseSensivity;
+				totalYaw += static_cast<float>(mouseX) * rotationModifier;
+				break;
+			case SDL_BUTTON_RMASK:
+				totalYaw += static_cast<float>(mouseX) * rotationModifier;
+				totalPitch -= static_cast<float>(mouseY) * rotationModifier;
+				break;
+			default:
+				break;
 			}
+
+			//Clamp Pitch between -90° and 90°
+			totalPitch = std::clamp(totalPitch, -maxPitch, maxPitch);
 
 			//Update Matrices
 			CalculateViewMatrix();
