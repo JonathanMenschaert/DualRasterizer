@@ -85,7 +85,7 @@ namespace dae
 	{
 		pMesh->GetVerticesOut().clear();
 		pMesh->GetVerticesOut().reserve(pMesh->GetVertices().size());
-		const Matrix worldViewProjectionMatrix{ pMesh->GetWorldMatrix() * camera->viewMatrix * camera->projectionMatrix };
+		const Matrix worldViewProjectionMatrix{ pMesh->GetWorldMatrix() * camera->GetViewMatrix() * camera->GetProjectionMatrix()};
 		for (const auto& vertexIn : pMesh->GetVertices())
 		{
 			VertexOut vertexOut{ Vector4{ vertexIn.position, 1.f}, vertexIn.uv, vertexIn.normal, 

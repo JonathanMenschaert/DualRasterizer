@@ -40,7 +40,7 @@ namespace dae {
 
 		m_pProcessorGPU = new ProcessorGPU(m_pDevice, m_pDeviceContext, pWindow);
 		m_pProcessorCPU = new ProcessorCPU(pWindow);
-		m_pRenderProcessor = m_pProcessorCPU;		
+		m_pRenderProcessor = m_pProcessorGPU;		
 
 		PrintHeader();
 	}
@@ -78,7 +78,7 @@ namespace dae {
 			{
 				pMesh->RotateY(pTimer->GetElapsed() * m_RotationSpeed);
 			}
-			pMesh->SetMatrices(m_Camera.viewMatrix * m_Camera.projectionMatrix, m_Camera.invViewMatrix);
+			pMesh->SetMatrices(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix(), m_Camera.GetInvViewMatrix());
 		}
 	}
 

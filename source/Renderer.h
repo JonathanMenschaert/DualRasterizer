@@ -45,7 +45,7 @@ namespace dae
 			CPU,
 			GPU
 		};
-		ProcessorType m_ProcessorType{ ProcessorType::CPU };
+		ProcessorType m_ProcessorType{ ProcessorType::GPU };
 
 		SDL_Window* m_pWindow{};
 

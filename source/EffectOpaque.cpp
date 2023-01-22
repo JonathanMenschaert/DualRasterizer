@@ -203,6 +203,7 @@ namespace dae
 
 		const float observedArea{ std::max(Vector3::Dot(sampledNormal, -m_LightDirection), 0.f) };
 		const ColorRGB observedAreaColor{ observedArea, observedArea, observedArea };
+
 		switch (shadingMode)
 		{
 		case ShadingMode::Combined:

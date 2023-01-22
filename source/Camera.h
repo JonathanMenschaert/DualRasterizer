@@ -49,18 +49,33 @@ namespace dae
 			origin = _origin;
 		}
 
+		const Matrix& GetViewMatrix() const
+		{
+			return viewMatrix;
+		}
+
+		const Matrix& GetInvViewMatrix() const
+		{
+			return invViewMatrix;
+		}
+
+		const Matrix& GetProjectionMatrix() const
+		{
+			return projectionMatrix;
+		}
+
 		void CalculateViewMatrix()
 		{
 			//TODO W1
 			//ONB => invViewMatrix
 			//Inverse(ONB) => ViewMatrix
 			const Matrix finalRotation = Matrix::CreateRotation({ totalPitch, totalYaw, 0.f });
-			forward = finalRotation.TransformVector(Vector3::UnitZ);
+			forward = finalRotation.TransformVector(Vector3::UnitZ).Normalized();
 			right = Vector3::Cross(Vector3::UnitY, forward).Normalized();
 			up = Vector3::Cross(forward, right).Normalized();
 			invViewMatrix = { right, up, forward, origin };
 
-			viewMatrix = invViewMatrix.Inverse();
+			viewMatrix = Matrix::Inverse(invViewMatrix);
 			//ViewMatrix => Matrix::CreateLookAtLH(...) [not implemented yet]
 			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixlookatlh
 		}

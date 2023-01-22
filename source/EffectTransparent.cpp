@@ -114,12 +114,14 @@ namespace dae
 		const uint8_t green{ static_cast<uint8_t>(currentColor >> 8) };
 		const uint8_t blue{ static_cast<uint8_t>(currentColor) };
 
-		const ColorRGB color{ 
+		const ColorRGB oldColor{ 
 			static_cast<float>(red) * m_ColorModifier, 
 			static_cast<float>(green) * m_ColorModifier,
-			static_cast<float>(blue) * m_ColorModifier };
+			static_cast<float>(blue) * m_ColorModifier 
+		};
+
 		const ColorRGB newColor{ alphaColor.x, alphaColor.y, alphaColor.z };
-		return newColor * alphaColor.w + color * (1 - alphaColor.w);
+		return newColor * alphaColor.w + oldColor * (1 - alphaColor.w);
 	}
 	
 	void EffectTransparent::CycleCullMode(ID3D11Device* pDevice)

@@ -107,8 +107,9 @@ namespace dae
 	void Mesh::SetMatrices(const Matrix& viewProjMatrix, const Matrix& inverseViewMatrix)
 	{
 		m_WorldMatrix = m_RotationMatrix * m_TranslationMatrix;
-		m_pEffect->SetViewProjectionMatrix(m_WorldMatrix * viewProjMatrix);
-		m_pEffect->SetWorldMatrix(m_WorldMatrix);
+		const Matrix worldMatrix{ m_WorldMatrix };
+		m_pEffect->SetViewProjectionMatrix(worldMatrix * viewProjMatrix);
+		m_pEffect->SetWorldMatrix(worldMatrix);
 		m_pEffect->SetViewInverseMatrix(inverseViewMatrix);
 	}
 	const std::vector<VertexExt>& Mesh::GetVertices() const
