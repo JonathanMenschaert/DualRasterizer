@@ -125,10 +125,10 @@ namespace dae
 			switch (mouseState)
 			{
 			case SDL_BUTTON_X2:
-				origin -= Vector3::UnitY * static_cast<float>(mouseY) * mouseSensivity;
+				origin -= Vector3::UnitY * static_cast<float>(mouseY) * mouseSensivity * shiftModifier;
 				break;
 			case SDL_BUTTON_LMASK:
-				origin -= forward * static_cast<float>(mouseY) * mouseSensivity;
+				origin -= forward * static_cast<float>(mouseY) * mouseSensivity ;
 				totalYaw += static_cast<float>(mouseX) * rotationModifier;
 				break;
 			case SDL_BUTTON_RMASK:
