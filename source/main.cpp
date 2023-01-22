@@ -6,8 +6,19 @@
 
 #undef main
 #include "Renderer.h"
-
+#include <Windows.h>
 using namespace dae;
+
+//Make sure colors work in the console if not launched from visual studio
+void EnableConsoleColors()
+{
+	DWORD consoleMode;
+	const HANDLE outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (GetConsoleMode(outputHandle, &consoleMode))
+	{
+		SetConsoleMode(outputHandle, consoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+	}
+}
 
 void ShutDown(SDL_Window* pWindow)
 {
@@ -17,6 +28,9 @@ void ShutDown(SDL_Window* pWindow)
 
 int main(int argc, char* args[])
 {
+	//Set Console colors 
+	EnableConsoleColors();
+
 	//Unreferenced parameters
 	(void)argc;
 	(void)args;
@@ -124,3 +138,4 @@ int main(int argc, char* args[])
 	ShutDown(pWindow);
 	return 0;
 }
+
