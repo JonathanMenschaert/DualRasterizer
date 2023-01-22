@@ -32,16 +32,17 @@ namespace dae {
 		{
 			m_IsInitialized = true;
 			InitMeshes(m_pDevice);
-			std::cout << "Device and DeviceContext are initialized and ready!\n";
 		}
 		else
 		{
-			std::cout << "Device or DeviceContext initialization failed!\n";
+			std::wcout << "Device or DeviceContext initialization failed!\n";
 		}
 
 		m_pProcessorGPU = new ProcessorGPU(m_pDevice, m_pDeviceContext, pWindow);
 		m_pProcessorCPU = new ProcessorCPU(pWindow);
 		m_pRenderProcessor = m_pProcessorCPU;		
+
+		PrintHeader();
 	}
 
 	Renderer::~Renderer()
@@ -185,5 +186,32 @@ namespace dae {
 
 		EffectTransparent* pFireEffect{EffectTransparent::CreateEffect(pDevice, fxPath, diffusePath)};
 		m_Meshes.push_back(new Mesh(pDevice, vertices, indices, pFireEffect, rotation, translation));
+	}
+	void Renderer::PrintHeader() const
+	{
+		//Shared Keybindings
+		std::wcout << "\033[33m" << "[Key Bindings - SHARED]\n";
+		std::wcout << "\t[F1]\tToggle Rasterizer Mode (HARDWARE/SOFTWARE)\n";
+		std::wcout << "\t[F2]\tToggle Vehicle Rotation (ON/OFF)\n";
+		std::wcout << "\t[F3]\tToggle FireFX (ON/OFF)\n";
+		std::wcout << "\t[F9]\tCycle CullMode (BACK/FRONT/NONE)\n";
+		std::wcout << "\t[F10]\tUniform ClearColor (ON/OFF)\n";
+		std::wcout << "\t[F11]\tToggle Print FPS (ON/OFF)" << "\033[0m" << "\n\n";
+
+		//Hardware Keybindings
+		std::wcout << "\033[32m" << "[Key Bindings - HARDWARE]\n";
+		std::wcout << "\t[F4]\tCycle Sampler State (POINT/LINEAR/ANISOTROPIC)" << "\033[0m" << "\n\n";
+
+		//Software Keybindings
+		std::wcout << "\033[35m" << "[Key Bindings - SOFTWARE]\n";
+		std::wcout << "\t[F5]\tToggle Shading Mode (COMBINED/OBSERVED_AREA/DIFFUSE/SPECULAR)\n";
+		std::wcout << "\t[F6]\tToggle NormalMap (ON/OFF)\n";
+		std::wcout << "\t[F7]\tToggle DepthBuffer Visualization (ON/OFF)\n";
+		std::wcout << "\t[F8]\tToggle BoundingBox Visualization (ON/OFF)" << "\033[0m" << "\n\n";
+
+		//Software Extras
+		std::wcout << "\033[36m" << "[Extras - SOFTWARE]\n";
+		std::wcout << "\t[+]\tMultithreading\n";
+		std::wcout << "\t[+]\tFireFX" << "\033[0m" << "\n\n";
 	}
 }

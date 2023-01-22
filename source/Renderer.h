@@ -38,6 +38,7 @@ namespace dae
 	private:
 
 		void InitMeshes(ID3D11Device* pDevice);
+		void PrintHeader() const;
 
 		enum class ProcessorType
 		{
